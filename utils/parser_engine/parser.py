@@ -40,7 +40,6 @@ def parse_by_xpath(url, path):
         return exc
 
 
-def close():
-    DRIVER.quit()
+# DRIVER.quit()
 
 

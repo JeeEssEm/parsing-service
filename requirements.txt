@@ -1,5 +1,4 @@
-requests
-lxml
 selenium-stealth
 pytelegrambotapi
-APScheduler
+schedule
+sqlite3
