@@ -11,7 +11,7 @@ class User:  # класс для хранения пользователя
     xpath: str
     comparer: int
 
-    type: int = 1
+    type: int = 1  # int или str
     previous_data: str = None
     login: str = None
     password: str = None
