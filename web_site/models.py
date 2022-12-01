@@ -10,6 +10,7 @@ class User(db.Model):
     name = db.Column(db.String(32), unique=True)
     email = db.Column(db.String(64), unique=True)
     password = db.Column(db.String(128))
+    token_active = db.Column(db.Boolean, default=False)
 
     url = db.relationship("Url", backref="owner")
 
@@ -18,6 +19,9 @@ class User(db.Model):
 
     def check_password(self, pwd):
         return check_password_hash(self.password, pwd)
+
+    def set_token_active(self, status):
+        self.token_active = status
 
     def __repr__(self):
         return f"<User> {self.name} {self.telegram_id}"
@@ -50,4 +54,12 @@ class Auth(db.Model):
     def __repr__(self):
         return f"<Auth> {self.login} {self.password}"
 
+
+class ExpiredToken(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    token = db.Column(db.String, unique=True)
+    created = db.Column(db.DateTime, nullable=True)
+
+    def __repr__(self):
+        return f"<Token> {self.token} {self.date}"
 
