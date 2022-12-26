@@ -1,12 +1,16 @@
 from flask import request
 from flask_restx import Api, Resource, fields
-from .models import User, Url, ExpiredToken
+from .models import User, Url as UrlModel, ExpiredToken
 from . import db
 from .config import Config
+from .utils.utils import cast_string_to_comparer, cast_string_to_type, cast_comparer_to_string, cast_type_to_string,\
+    get_info_to_send
+from .utils.parser_engine.parser import parse_by_xpath
 import jwt
 from functools import wraps
 from datetime import datetime, timedelta
 from sqlalchemy import or_
+from .utils.utils import get_data
 
 
 def token_required(f):
@@ -26,20 +30,24 @@ def token_required(f):
             }, 400
 
         try:
-            data = jwt.decode(token, Config.SECRET_KEY, algorithms=["HS256"])
-            current_user = User.query.filter(User.email == data["email"]).first()
+            if token == 'bot':
+                current_user = 'bot'
 
-            if not current_user:
-                return {"success": False,
-                        "message": "Такого пользователя не существует"}, 400
+            else:
+                data = jwt.decode(token, Config.SECRET_KEY, algorithms=["HS256"])
+                current_user = User.query.filter(User.email == data["email"]).first()
 
-            token_expired = ExpiredToken.query.filter(ExpiredToken.token == token).first()
+                if not current_user:
+                    return {"success": False,
+                            "message": "Такого пользователя не существует"}, 400
 
-            if token_expired is not None:
-                return {"success": False, "message": "Такого токена больше не существует"}, 400
+                token_expired = ExpiredToken.query.filter(ExpiredToken.token == token).first()
 
-            if not current_user.token_active:
-                return {"success": False, "message": "Токен устарел"}, 400
+                if token_expired is not None:
+                    return {"success": False, "message": "Такого токена больше не существует"}, 400
+
+                if not current_user.token_active:
+                    return {"success": False, "message": "Токен устарел"}, 400
 
         except Exception as exc:
             print(exc)
@@ -54,7 +62,7 @@ rest = Api(version='1.0', title='API')
 urls = rest.namespace('urls')
 auth = rest.namespace('auth')
 
-""" models """
+""" json модели """
 
 signup_model = auth.model(
     'SignUpModel', {
@@ -69,6 +77,17 @@ login_model = auth.model(
     'LoginModel', {
         "email": fields.String(required=True, min_length=5),
         "password": fields.String(required=True)
+    }
+)
+
+url_model = urls.model(
+    'UrlModel', {
+        'xpath': fields.String(required=True),
+        'title': fields.String(required=True, min_length=1),
+        'description': fields.String(),
+        'url': fields.String(required=True, min_length=5),
+        'type': fields.String(required=True),
+        'comparer': fields.String(required=True),
     }
 )
 
@@ -191,8 +210,68 @@ class Logout(Resource):
 
 """ data routes """
 
-# @urls.route('/api/urls/url')
-# class Url(Resource):
-#
-#
-#     def get(self, current_user):
+
+@urls.route('/api/urls/url')
+class Url(Resource):
+
+    @token_required
+    def get(self, curr_user):
+        # user = User.query.filter(User.id == 1).first()  # затычка
+
+        if self == 'bot':
+            info = get_info_to_send(UrlModel.query.all())
+
+            return {
+                'values': info
+            }, 200
+
+        res = []
+        for url in self.urls:
+            url = url.get_dict()
+
+            url['comparer'] = cast_comparer_to_string(url['comparer'])
+            url['type'] = cast_type_to_string(url['type'])
+
+            res.append(url)
+
+        return {
+            'success': True,
+            'urls': res
+        }, 200
+
+    @token_required
+    @urls.expect(url_model, validate=True)
+    def post(self, cur_user):
+        data = request.get_json()
+
+        xpath = data.get('xpath')
+        title = data.get('title')
+        desc = data.get('description')
+        url = data.get('url')
+
+        tp = cast_string_to_type(data.get('type'))
+        comp = cast_string_to_comparer(data.get('comparer'))
+
+        # user = User.query.filter(User.id == 1).first()  # затычка
+
+        status, prev_data = parse_by_xpath(url, xpath)
+
+        if not status:
+            return {
+                'success': False,
+                'message': prev_data
+            }, 400
+
+        url = UrlModel(
+            owner_id=self.id, xpath=xpath, title=title, description=desc, url=url, type=tp, comparer=comp,
+            prev_data=prev_data
+        )
+
+        db.session.add(url)
+        db.session.commit()
+
+        return {
+            'success': True
+        }, 200
+
+

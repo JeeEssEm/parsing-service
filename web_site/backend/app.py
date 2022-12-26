@@ -1,4 +1,4 @@
-from web_site import app
+from web_site.backend import app
 
 
 if __name__ == "__main__":

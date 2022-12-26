@@ -1,15 +1,17 @@
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium_stealth import stealth
-
+from os import path
 import time
+
+BASEDIR = path.abspath(path.dirname(__file__))
 
 OPTIONS = webdriver.ChromeOptions()
 OPTIONS.add_argument("start-maximized")
 
 OPTIONS.add_experimental_option("excludeSwitches", ["enable-automation"])
 OPTIONS.add_experimental_option('useAutomationExtension', False)
-DRIVER = webdriver.Chrome(options=OPTIONS, executable_path=r"chromedriver.exe")
+DRIVER = webdriver.Chrome(options=OPTIONS, executable_path=path.join(BASEDIR, "chromedriver.exe"))
 
 stealth(DRIVER,
         languages=["en-US", "en"],
@@ -21,25 +23,30 @@ stealth(DRIVER,
         )
 
 
-def sign_in(url, login, password):
-    ...
-
-
-def parse_by_xpath(url, path):
-    path = path.replace("/text()", "")
+def parse_by_xpath(url, xpath):
+    xpath = xpath.replace("/text()", "")
 
     try:  # проверка на корректный url
         DRIVER.get(url)
     except Exception as exc:
-        return exc
+        return False, Exception(f'Некорректный url: {url}')
     time.sleep(1)
 
     try:  # проверка на корректный xpath
-        return DRIVER.find_element(By.XPATH, path).text
+        return True, DRIVER.find_element(By.XPATH, xpath).text
     except Exception as exc:
-        return exc
+        return False, Exception(f'Некорректный xpath: {xpath}, url: {url}')
 
 
+def parse_text(url):
+    return parse_by_xpath(url, '/html/body')
+
+
+def sign_in(url, login, password):
+    ...
 # DRIVER.quit()
 
 
+if __name__ == '__main__':
+    print(parse_text('https://www.geeksforgeeks.org/convert-base-decimal-vice-versa/'))
+    DRIVER.quit()

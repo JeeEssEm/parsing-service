@@ -10,9 +10,14 @@ class User(db.Model):
     name = db.Column(db.String(32), unique=True)
     email = db.Column(db.String(64), unique=True)
     password = db.Column(db.String(128))
-    token_active = db.Column(db.Boolean, default=False)
+    token_active = db.Column(db.Boolean, default=False, nullable=False)
 
-    url = db.relationship("Url", backref="owner")
+    urls = db.relationship("Url", back_populates="owner")
+
+    def get_dict(self):
+        return {
+            c.name: getattr(self, c.name) for c in self.__table__.columns
+        }
 
     def set_password(self, pwd):
         self.password = generate_password_hash(pwd)
@@ -24,7 +29,7 @@ class User(db.Model):
         self.token_active = status
 
     def __repr__(self):
-        return f"<User> {self.name} {self.telegram_id}"
+        return f"<User> {self.name} {self.telegram_id} {self.urls}"
 
 
 class Url(db.Model):
@@ -38,8 +43,15 @@ class Url(db.Model):
     type = db.Column(db.Integer, nullable=False)
     prev_data = db.Column(db.Text)
     comparer = db.Column(db.Integer, nullable=False)
+    expected_value = db.Column(db.Text, nullable=True)
 
+    owner = db.relationship("User", back_populates="urls")
     auth = db.relationship("Auth")
+
+    def get_dict(self):
+        return {
+            c.name: getattr(self, c.name) for c in self.__table__.columns
+        }
 
     def __repr__(self):
         return f"<Url> {self.url} {self.xpath} {self.title}"
