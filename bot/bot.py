@@ -1,6 +1,10 @@
 import telebot
+import os
 
-TOKEN = "5650047359:AAHsM7kg-LrtTQ_Nfw2THKT6I51wfeMZQrA"
+
+with open(os.path.join(os.path.dirname(__file__), '.env')) as f:
+    TOKEN = f.read()
+
 BOT = telebot.TeleBot(TOKEN)
 
 
