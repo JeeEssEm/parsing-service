@@ -4,8 +4,11 @@ from .enums import *
 # from web_site.backend.models import Url
 # import parser_engine.parser as ps
 from .parser_engine import parser as ps
-from web_site.backend.models import Url, db
-
+from backend.models import Url, db
+from backend.config import Config
+import jwt
+from datetime import datetime, timedelta
+# from backend.models import Url, db
 
 VALUES = {
         "EQUALITY": Comparer.EQUALITY.value,
@@ -136,6 +139,25 @@ def cast_comparer_to_string(num):
 
 def cast_type_to_string(num):
     return 'Numeric' if num == Types.Numeric.value else 'String'
+
+
+def generate_tokens(email):
+    access_token = jwt.encode(
+        {
+            'email': email,
+            'exp': datetime.now() + timedelta(minutes=30)
+        },
+        Config.JWT_ACCESS_TOKEN
+    )
+
+    refresh_token = jwt.encode(
+        {
+            'email': email,
+            'exp': datetime.now() + timedelta(days=30)
+        },
+        Config.JWT_REFRESH_TOKEN
+    )
+    return access_token, refresh_token
 
 
 if __name__ == "__main__":

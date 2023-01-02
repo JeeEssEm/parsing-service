@@ -39,14 +39,14 @@ class Url(db.Model):
     owner_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     title = db.Column(db.String)
     description = db.Column(db.Text)
-    auth_id = db.Column(db.Integer, db.ForeignKey('auth.id'), default=None)
+    auth_id = db.Column(db.Integer, db.ForeignKey('auth.id'), default=None, nullable=True)
     type = db.Column(db.Integer, nullable=False)
     prev_data = db.Column(db.Text)
     comparer = db.Column(db.Integer, nullable=False)
     expected_value = db.Column(db.Text, nullable=True)
 
     owner = db.relationship("User", back_populates="urls")
-    auth = db.relationship("Auth")
+    auth = db.relationship("Auth", foreign_keys=[auth_id])
 
     def get_dict(self):
         return {
@@ -61,7 +61,9 @@ class Auth(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     login = db.Column(db.String)
     password = db.Column(db.String)
-    url_id = db.Column(db.Integer, default=None)
+    url_id = db.Column(db.Integer, db.ForeignKey('url.id'), default=None)
+
+    url = db.relationship('Url', foreign_keys=[url_id])
 
     def __repr__(self):
         return f"<Auth> {self.login} {self.password}"
@@ -74,4 +76,12 @@ class ExpiredToken(db.Model):
 
     def __repr__(self):
         return f"<Token> {self.token} {self.date}"
+
+
+class RefreshToken(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    token_value = db.Column(db.String)
+
+    owner = db.relationship("User")
 

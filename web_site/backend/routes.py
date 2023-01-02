@@ -1,53 +1,51 @@
-from flask import request
+from flask import request, make_response
 from flask_restx import Api, Resource, fields
-from .models import User, Url as UrlModel, ExpiredToken
+from .models import User, Url as UrlModel, ExpiredToken, RefreshToken
 from . import db
 from .config import Config
-from .utils.utils import cast_string_to_comparer, cast_string_to_type, cast_comparer_to_string, cast_type_to_string,\
-    get_info_to_send
+from .utils.utils import cast_string_to_comparer, cast_string_to_type, cast_comparer_to_string, cast_type_to_string, \
+    get_info_to_send, generate_tokens
 from .utils.parser_engine.parser import parse_by_xpath
 import jwt
 from functools import wraps
 from datetime import datetime, timedelta
 from sqlalchemy import or_
-from .utils.utils import get_data
 
 
 def token_required(f):
-
     @wraps(f)
     def decorator(*args, **kwargs):
 
         token = None
 
-        if "authorization" in request.headers:
-            token = request.headers["authorization"]
+        # if "authorization" in request.headers:
+        token = request.cookies.get("refresh_token")
 
         if not token:
             return {
-                "success": False,
-                "message": "Отсутствует токен"
-            }, 400
+                       "success": False,
+                       "message": "Отсутствует токен"
+                   }, 400
 
         try:
             if token == 'bot':
                 current_user = 'bot'
 
             else:
-                data = jwt.decode(token, Config.SECRET_KEY, algorithms=["HS256"])
+                data = jwt.decode(token, Config.JWT_REFRESH_TOKEN, algorithms=["HS256"], verify=True)
                 current_user = User.query.filter(User.email == data["email"]).first()
 
                 if not current_user:
                     return {"success": False,
                             "message": "Такого пользователя не существует"}, 400
 
-                token_expired = ExpiredToken.query.filter(ExpiredToken.token == token).first()
+                # token_expired = ExpiredToken.query.filter(ExpiredToken.token == token).first()
 
-                if token_expired is not None:
-                    return {"success": False, "message": "Такого токена больше не существует"}, 400
+                # if token_expired is not None:
+                #     return {"success": False, "message": "Такого токена больше не существует"}, 400
 
-                if not current_user.token_active:
-                    return {"success": False, "message": "Токен устарел"}, 400
+                # if not current_user.token_active:
+                #     return {"success": False, "message": "Токен устарел"}, 400
 
         except Exception as exc:
             print(exc)
@@ -130,22 +128,45 @@ class Register(Resource):
 
             db.session.add(user)
             db.session.commit()
+            # ТОКЕНЫ
+            access_token, refresh_token = generate_tokens(email)
+
+            refresh_token_model = RefreshToken(
+                user_id=user.id,
+                token_value=refresh_token
+            )
+
+            db.session.add(refresh_token_model)
+            db.session.commit()
+            # Конец токенов
 
             success = True
             msg = "User registered successfully"
-            code = 200
+            response = make_response(
+                {
+                    "success": success,
+                    "message": msg,
+                    "email": email,
+                    "name": name,
+                    "refresh_token": refresh_token,
+                    "access_token": access_token
+                }
+            )
+            response.set_cookie(
+                'refresh_token', refresh_token,
+                httponly=True, max_age=timedelta(days=30)
+            )
+            return response
 
         except Exception as exc:
             print(exc)
 
-            success = True
             msg = "Failed to register user"
-            code = 400
 
         return {
-                   "success": success,
+                   "success": False,
                    "message": msg
-               }, code
+               }, 400
 
 
 @auth.route("/api/users/login")
@@ -163,29 +184,51 @@ class Login(Resource):
 
         if not user:
             return {
-                "success": False,
-                "message": "Такого поользователя не существует",
-            }, 400
+                       "success": False,
+                       "message": "Такого поользователя не существует",
+                   }, 400
 
         if not user.check_password(password):
             return {
-                "success": False,
-                "message": "Неверный пароль"
-            }, 400
+                       "success": False,
+                       "message": "Неверный пароль"
+                   }, 400
 
-        token = jwt.encode({
-            "email": email,
-            "expires": str(datetime.utcnow() + timedelta(days=30))
-        }, Config.SECRET_KEY)
+        # token = jwt.encode({
+        #     "email": email,
+        #     "expires": str(datetime.utcnow() + timedelta(days=30))
+        # }, Config.SECRET_KEY)
+
+        # ТОКЕНЫ
+        access_token, refresh_token = generate_tokens(email)
+
+        refresh_token_model = RefreshToken(
+            user_id=user.id,
+            token_value=refresh_token
+        )
+
+        db.session.add(refresh_token_model)
+        db.session.commit()
+        # КОНЕЦ ТОКЕНОВ
+
+        response = make_response(
+            {
+                "success": True,
+                "refresh_token": refresh_token,
+                "access_token": access_token
+            }, 200
+        )
+
+        response.set_cookie(
+            'refresh_token', refresh_token,
+            httponly=True, max_age=timedelta(days=30)
+        )
 
         user.set_token_active(True)
         db.session.add(user)
         db.session.commit()
 
-        return {
-            "success": True,
-            "token": token,
-        }, 200
+        return response
 
 
 @auth.route('/api/users/logout')
@@ -193,19 +236,52 @@ class Logout(Resource):
 
     @token_required
     def post(self, user):  # на самом деле в self попадает сама orm модель юзера, а в user уже селф
-        token = request.headers["authorization"]
-
-        exp_token = ExpiredToken(token=token, created=datetime.now())
-        self.set_token_active(False)
-
-        db.session.add(exp_token)
-        db.session.add(self)
+        # token = request.headers["authorization"]
+        #
+        # exp_token = ExpiredToken(token=token, created=datetime.now())
+        # self.set_token_active(False)
+        #
+        # db.session.add(exp_token)
+        # db.session.add(self)
+        # db.session.commit()
+        refresh_token = request.cookies.get('refresh_token')
+        print(refresh_token)
+        RefreshToken.query.filter(RefreshToken.token_value == refresh_token).delete()
         db.session.commit()
 
+        response = make_response()
+        response.delete_cookie('refresh_token')
         return {
+                   "success": True,
+                   "message": "Вы вышли из аккаунта"
+               }, 200
+
+
+@auth.route('/api/users/refresh')
+class Refresh(Resource):
+
+    @token_required
+    def post(self, token):
+        refresh_token = request.cookies.get('refresh_token')
+        token_model = RefreshToken.query.filter(RefreshToken.token_value == refresh_token).first()
+
+        new_access_token, new_refresh_token = generate_tokens(token_model.owner.email)
+
+        token_model.token_value = new_refresh_token
+        db.session.add(token_model)
+        db.session.commit()
+
+        response = make_response({
             "success": True,
-            "message": "Вы вышли из аккаунта"
-        }, 200
+            "access_token": new_access_token,
+            "refresh_token": new_refresh_token
+        })
+
+        response.set_cookie(
+            'refresh_token', new_refresh_token,
+            httponly=True, max_age=timedelta(days=30)
+        )
+        return response
 
 
 """ data routes """
@@ -222,8 +298,8 @@ class Url(Resource):
             info = get_info_to_send(UrlModel.query.all())
 
             return {
-                'values': info
-            }, 200
+                       'values': info
+                   }, 200
 
         res = []
         for url in self.urls:
@@ -235,9 +311,9 @@ class Url(Resource):
             res.append(url)
 
         return {
-            'success': True,
-            'urls': res
-        }, 200
+                   'success': True,
+                   'urls': res
+               }, 200
 
     @token_required
     @urls.expect(url_model, validate=True)
@@ -258,9 +334,9 @@ class Url(Resource):
 
         if not status:
             return {
-                'success': False,
-                'message': prev_data
-            }, 400
+                       'success': False,
+                       'message': prev_data
+                   }, 400
 
         url = UrlModel(
             owner_id=self.id, xpath=xpath, title=title, description=desc, url=url, type=tp, comparer=comp,
@@ -271,7 +347,5 @@ class Url(Resource):
         db.session.commit()
 
         return {
-            'success': True
-        }, 200
-
-
+                   'success': True
+               }, 200
