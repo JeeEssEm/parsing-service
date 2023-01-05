@@ -1,0 +1,40 @@
+.filled, .outlined {
+    border-radius: 15px;
+    font-weight: 400;
+    font-size: 1.2em;
+    padding: 10px 15px;
+    font-family: 'Lato', sans-serif;
+    background: none;
+    border: 2px solid #0071E3;
+    cursor: pointer;
+    transition:
+            color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+}
+
+.filled {
+    background-color: #0071E3;
+    color: white;
+}
+
+.outlined {
+    color: #0071E3;
+}
+
+/*.filled:active, .outlined:active {*/
+/*    background-color: #0150a8;*/
+/*    border-color: #0150a8;*/
+/*}*/
+
+.filled:hover {
+    background-color: #0160c5;
+    border-color: #0160c5;
+}
+
+.outlined:hover {
+    background-color: #0071E3;
+    color: white;
+}
+
+
+
+

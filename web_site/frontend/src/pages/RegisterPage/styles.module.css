@@ -1,0 +1,8 @@
+.login {
+    height: calc(100vh - 100px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #DDE5F4;
+    width: 100vw;
+}
