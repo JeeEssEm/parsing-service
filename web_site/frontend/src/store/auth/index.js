@@ -8,7 +8,7 @@ const user = AuthService.getCurrentUser();
 const initialState = {
     isAuth: !!user,
     user: user ? user : null,
-    loading: false
+    loading: true
 }
 
 
@@ -16,8 +16,16 @@ export const authSlice = createSlice({
     name: 'auth',
     initialState,
     reducers: {
+        setLoading: (state) => {
+            state.loading = true;
+        },
 
+        removeLoading: (state) => {
+            state.loading = false;
+            console.log('removed loading')
+        }
     },
+
     extraReducers: (builder) => {
         builder.addCase(
             register.pending, (state) => {
@@ -56,12 +64,19 @@ export const authSlice = createSlice({
             state.user = null;
         });
 
-        builder.addCase(checkAuth.fulfilled, (state) => {
+        builder.addCase(checkAuth.fulfilled, (state, action) => {
             state.isAuth = true;
+            state.loading = false;
+            state.user = action.payload.user;
         });
+
+        builder.addCase(checkAuth.pending, (state) => {
+            state.loading = true;
+        })
 
         builder.addCase(checkAuth.rejected, (state) => {
             state.isAuth = false;
+            state.loading = false;
             state.user = null;
         })
 

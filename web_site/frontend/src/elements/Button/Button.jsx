@@ -7,8 +7,10 @@ export const Button = (props) => {
         'filled': styles.filled
     }
 
+    const elementStyles = [modificateStyles, buttonStyles[style_type]]
+
     return (
-        <button onClick={onClick} className={buttonStyles[style_type]} aria-label='Кнопка' {...restProps} type='button'>
+        <button onClick={onClick} className={elementStyles.join(" ")} aria-label='Кнопка' {...restProps} type='button'>
             {children}
         </button>
     )

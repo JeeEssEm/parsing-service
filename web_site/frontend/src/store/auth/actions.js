@@ -39,7 +39,7 @@ export const login = createAsyncThunk(
 
 export const logout = createAsyncThunk(
     'auth/logout',
-    async ({email, name, password}) => {
+    async () => {
         await AuthService.logout();
     }
 );
@@ -52,8 +52,8 @@ export const checkAuth = createAsyncThunk(
             const response = await axios.get(`${API_URL}auth/api/users/refresh`, {
                 withCredentials: true
             })
-            localStorage.setItem('token', response.data.access_token)
-
+            localStorage.setItem('token', response.data.access_token);
+            return response.data;
         }
         catch (e) {
             console.log(e)
@@ -62,4 +62,9 @@ export const checkAuth = createAsyncThunk(
 
     }
 )
+
+export const Loading = createAsyncThunk('auth/stopLoading', async (arg, thunkAPI) => {
+    return thunkAPI.rejectWithValue("");
+})
+
 

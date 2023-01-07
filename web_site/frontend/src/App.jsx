@@ -6,13 +6,26 @@ import {SitesPage} from "./pages/SitesPage";
 import {LoginPage} from "./pages/LoginPage";
 import {RegisterPage} from "./pages/RegisterPage";
 import {ProfilePage} from "./pages/ProfilePage";
-import {Provider} from "react-redux";
-import {store} from "./store";
+import {useDispatch} from "react-redux";
+import {useEffect} from "react";
+import {checkAuth} from "./store/auth/actions";
+import {authSlice} from "./store/auth";
 
 
 function App() {
+    const dispatch = useDispatch();
+
+    useEffect(() => {
+        // dispatch(authSlice.actions.setLoading)
+        if (localStorage.getItem('token')) {
+            dispatch(checkAuth())
+        }
+        else {
+            dispatch(authSlice.actions.removeLoading())
+        }
+    })
+
     return (
-        <Provider store={store}>
           <BrowserRouter>
             <Layout>
               <Routes>
@@ -24,7 +37,6 @@ function App() {
               </Routes>
             </Layout>
           </BrowserRouter>
-        </Provider>
       );
 }
 

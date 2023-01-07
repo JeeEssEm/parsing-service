@@ -4,20 +4,14 @@ import {Button} from "../../elements/Button";
 import {NavLink} from "react-router-dom";
 import {useDispatch, useSelector} from "react-redux";
 import {selectIsAuth, selectIsLoading} from "../../store/auth/selectors";
-import {useEffect} from "react";
-import {checkAuth} from "../../store/auth/actions";
+import {logout} from "../../store/auth/actions";
+// import {useEffect} from "react";
+// import {checkAuth} from "../../store/auth/actions";
 
 export const Header = () => {
-    const dispatch = useDispatch();
-
-    useEffect(() => {
-        if (localStorage.getItem('token')) {
-            dispatch(checkAuth())
-        }
-    })
-
     const isAuth = useSelector((state) => selectIsAuth(state));
     const isLoading = useSelector((state) => selectIsLoading(state));
+    const dispatch = useDispatch();
 
     let profile = <>
         <NavLink to="/login"><Button style_type="outlined">Войти</Button></NavLink>
@@ -25,7 +19,10 @@ export const Header = () => {
     </>
 
     if (isAuth) {
-        profile = <h1>Вы авторизованы</h1>
+        profile = <>
+            <NavLink to="/profile">Профиль</NavLink>
+            <button onClick={() => dispatch(logout())}>Выйти из аккаунт</button>
+        </>
     }
 
     if (isLoading) {

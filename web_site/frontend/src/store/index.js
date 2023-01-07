@@ -1,9 +1,13 @@
 import {combineReducers, configureStore} from "@reduxjs/toolkit";
 import {authSlice} from "./auth";
+import {urlSlice} from "./url";
+import {urlsSlice} from "./urls";
 
 export const store = configureStore({
     reducer: combineReducers({
-        auth: authSlice.reducer
+        auth: authSlice.reducer,
+        url: urlSlice.reducer,
+        urls: urlsSlice.reducer
     })
 })
 

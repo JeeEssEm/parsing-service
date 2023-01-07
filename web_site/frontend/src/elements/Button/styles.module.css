@@ -5,19 +5,19 @@
     padding: 10px 15px;
     font-family: 'Lato', sans-serif;
     background: none;
-    border: 2px solid #0071E3;
+    border: 2px solid #1a73e8;
     cursor: pointer;
     transition:
             color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out;
 }
 
 .filled {
-    background-color: #0071E3;
+    background-color: #1a73e8;
     color: white;
 }
 
 .outlined {
-    color: #0071E3;
+    color: #1a73e8;
 }
 
 /*.filled:active, .outlined:active {*/
@@ -26,13 +26,13 @@
 /*}*/
 
 .filled:hover {
-    background-color: #0160c5;
-    border-color: #0160c5;
+    background-color: #1B66C9;
+    border-color: #1B66C9;
 }
 
 .outlined:hover {
-    background-color: #0071E3;
-    color: white;
+    /*background-color: #1a73e8;*/
+    color: #174ea6;
 }
 
 
