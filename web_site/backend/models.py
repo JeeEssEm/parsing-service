@@ -12,7 +12,7 @@ class User(db.Model):
     password = db.Column(db.String(128))
     token_active = db.Column(db.Boolean, default=False, nullable=False)
 
-    urls = db.relationship("Url", back_populates="owner")
+    urls = db.relationship("Url", back_populates="owner", lazy="dynamic")
 
     def get_dict(self):
         return {
@@ -49,8 +49,29 @@ class Url(db.Model):
     auth = db.relationship("Auth", foreign_keys=[auth_id])
 
     def get_dict(self):
+        # return {
+        #     c.name: getattr(self, c.name) for c in self.__table__.columns
+        # }
         return {
-            c.name: getattr(self, c.name) for c in self.__table__.columns
+            "title": self.title,
+            "description": self.description,
+            "url": self.url,
+            "xpath": self.xpath,
+            "type": self.type,
+            "prev_data": self.prev_data,
+            "comparer": self.comparer,
+            "expected_value": self.expected_value,
+            "auth": {
+                "login": self.auth.login if self.auth else None,
+                "password": self.auth.password if self.auth else None
+            }
+        }
+
+    def get_short_dict(self):
+        return {
+            "id": self.id,
+            "title": self.title,
+            "url": self.url
         }
 
     def __repr__(self):

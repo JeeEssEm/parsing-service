@@ -1,5 +1,5 @@
 from flask import request, make_response
-from flask_restx import Api, Resource, fields
+from flask_restx import Api, Resource, fields, reqparse
 from .models import User, Url as UrlModel, ExpiredToken, RefreshToken
 from . import db
 from .config import Config
@@ -12,53 +12,63 @@ from datetime import datetime, timedelta
 from sqlalchemy import or_
 
 
-def token_required(f):
-    @wraps(f)
-    def decorator(*args, **kwargs):
+def token_required(refresh=False):
+    def token_func(f):
+        @wraps(f)
+        def decorator(self, *args, **kwargs):
 
-        token = None
+            token = None
 
-        # if "authorization" in request.headers:
-        token = request.cookies.get("refresh_token")
-
-        if not token:
-            return {
-                       "success": False,
-                       "message": "Отсутствует токен"
-                   }, 400
-
-        try:
-            if token == 'bot':
-                current_user = 'bot'
-
+            # if "authorization" in request.headers:
+            if not refresh:
+                token = request.headers['Authorization']
+                decrypt = Config.JWT_ACCESS_TOKEN
             else:
-                data = jwt.decode(token, Config.JWT_REFRESH_TOKEN, algorithms=["HS256"], verify=True)
-                current_user = User.query.filter(User.email == data["email"]).first()
+                token = request.cookies.get("refresh_token")
+                decrypt = Config.JWT_REFRESH_TOKEN
 
-                if not current_user:
-                    return {"success": False,
-                            "message": "Такого пользователя не существует"}, 400
+            if not token:
+                return {
+                           "success": False,
+                           "message": "Отсутствует токен"
+                       }, 400
 
-                # token_expired = ExpiredToken.query.filter(ExpiredToken.token == token).first()
+            try:
+                if token == 'bot':
+                    current_user = 'bot'
 
-                # if token_expired is not None:
-                #     return {"success": False, "message": "Такого токена больше не существует"}, 400
+                else:
+                    data = jwt.decode(token, decrypt, algorithms=["HS256"], verify=True)
+                    current_user = User.query.filter(User.email == data["email"]).first()
 
-                # if not current_user.token_active:
-                #     return {"success": False, "message": "Токен устарел"}, 400
+                    if not current_user:
+                        return {"success": False,
+                                "message": "Такого пользователя не существует"}, 400
 
-        except Exception as exc:
-            print(exc)
-            return {"success": False, "msg": "Неверный токен"}, 400
+                    # token_expired = ExpiredToken.query.filter(ExpiredToken.token == token).first()
 
-        return f(current_user, *args, **kwargs)
+                    # if token_expired is not None:
+                    #     return {"success": False, "message": "Такого токена больше не существует"}, 400
 
-    return decorator
+                    # if not current_user.token_active:
+                    #     return {"success": False, "message": "Токен устарел"}, 400
+
+            except Exception as exc:
+                print(exc)
+                return {"success": False, "msg": "Неверный токен"}, 400
+
+            return f(self, current_user, *args, **kwargs)
+
+        return decorator
+    return token_func
 
 
 rest = Api(version='1.0', title='API')
 urls = rest.namespace('urls')
 auth = rest.namespace('auth')
+
+get_url_parser = reqparse.RequestParser()
+get_url_parser.add_argument('url_id', type=int)
 
 """ json модели """
 
@@ -89,6 +99,12 @@ url_model = urls.model(
     }
 )
 
+get_url_model = urls.model(
+    'GetUrlModel', {
+        'url_id': fields.Integer(required=True)
+    }
+)
+
 """ auth routes"""
 
 
@@ -99,7 +115,7 @@ class Register(Resource):
     @auth.expect(signup_model, validate=True)
     def post(self):
         data = request.get_json()
-
+        print(data)
         name = data.get("name")
         email = data.get("email")
         telegram_id = data.get("telegram_id")
@@ -138,6 +154,7 @@ class Register(Resource):
 
             db.session.add(refresh_token_model)
             db.session.commit()
+
             # Конец токенов
 
             success = True
@@ -146,8 +163,10 @@ class Register(Resource):
                 {
                     "success": success,
                     "message": msg,
-                    "email": email,
-                    "name": name,
+                    "user": {
+                        "email": email,
+                        "name": name,
+                    },
                     "refresh_token": refresh_token,
                     "access_token": access_token
                 }
@@ -215,7 +234,11 @@ class Login(Resource):
             {
                 "success": True,
                 "refresh_token": refresh_token,
-                "access_token": access_token
+                "access_token": access_token,
+                "user": {
+                    "email": user.email,
+                    "name": user.name
+                }
             }, 200
         )
 
@@ -234,18 +257,10 @@ class Login(Resource):
 @auth.route('/api/users/logout')
 class Logout(Resource):
 
-    @token_required
-    def post(self, user):  # на самом деле в self попадает сама orm модель юзера, а в user уже селф
-        # token = request.headers["authorization"]
-        #
-        # exp_token = ExpiredToken(token=token, created=datetime.now())
-        # self.set_token_active(False)
-        #
-        # db.session.add(exp_token)
-        # db.session.add(self)
-        # db.session.commit()
+    @token_required(refresh=True)
+    def post(self, user):
+        print(user, self)
         refresh_token = request.cookies.get('refresh_token')
-        print(refresh_token)
         RefreshToken.query.filter(RefreshToken.token_value == refresh_token).delete()
         db.session.commit()
 
@@ -260,8 +275,8 @@ class Logout(Resource):
 @auth.route('/api/users/refresh')
 class Refresh(Resource):
 
-    @token_required
-    def post(self, token):
+    @token_required(refresh=True)
+    def get(self, user):
         refresh_token = request.cookies.get('refresh_token')
         token_model = RefreshToken.query.filter(RefreshToken.token_value == refresh_token).first()
 
@@ -274,7 +289,11 @@ class Refresh(Resource):
         response = make_response({
             "success": True,
             "access_token": new_access_token,
-            "refresh_token": new_refresh_token
+            "refresh_token": new_refresh_token,
+            "user": {
+                "email": user.email,
+                "name": user.name
+            }
         })
 
         response.set_cookie(
@@ -287,37 +306,54 @@ class Refresh(Resource):
 """ data routes """
 
 
-@urls.route('/api/urls/url')
-class Url(Resource):
+@urls.route('/api/urls')
+class Urls(Resource):
 
-    @token_required
-    def get(self, curr_user):
+    @token_required()
+    def get(self, user):
         # user = User.query.filter(User.id == 1).first()  # затычка
 
-        if self == 'bot':
+        if user == 'bot':
             info = get_info_to_send(UrlModel.query.all())
 
             return {
                        'values': info
                    }, 200
 
-        res = []
-        for url in self.urls:
-            url = url.get_dict()
-
-            url['comparer'] = cast_comparer_to_string(url['comparer'])
-            url['type'] = cast_type_to_string(url['type'])
-
-            res.append(url)
+        res = user.urls
 
         return {
                    'success': True,
-                   'urls': res
+                   'urls': [link.get_short_dict() for link in res]
                }, 200
 
-    @token_required
+
+@urls.route('/api/url')
+class Url(Resource):
+
+    @token_required()
+    @urls.expect(get_url_parser)
+    def get(self, user):
+        url_id = int(request.args.getlist('url_id')[0])
+        url = user.urls.filter(UrlModel.id == url_id).first()
+
+        if url:
+            url = url.get_dict()
+            url['comparer'] = cast_comparer_to_string(url['comparer'])
+            url['type'] = cast_type_to_string(url['type'])
+            return {
+                'success': True,
+                'url': url
+            }, 200
+
+        return {
+            'success': False,
+            'message': 'Url не найден'
+        }, 400
+
+    @token_required()
     @urls.expect(url_model, validate=True)
-    def post(self, cur_user):
+    def post(self, user):
         data = request.get_json()
 
         xpath = data.get('xpath')
@@ -331,15 +367,15 @@ class Url(Resource):
         # user = User.query.filter(User.id == 1).first()  # затычка
 
         status, prev_data = parse_by_xpath(url, xpath)
-
+        print(prev_data)
         if not status:
             return {
                        'success': False,
-                       'message': prev_data
+                       'message': str(prev_data)
                    }, 400
 
         url = UrlModel(
-            owner_id=self.id, xpath=xpath, title=title, description=desc, url=url, type=tp, comparer=comp,
+            owner_id=user.id, xpath=xpath, title=title, description=desc, url=url, type=tp, comparer=comp,
             prev_data=prev_data
         )
 
@@ -349,3 +385,4 @@ class Url(Resource):
         return {
                    'success': True
                }, 200
+
