@@ -1,11 +1,13 @@
 from flask import request, make_response
 from flask_restx import Api, Resource, fields, reqparse
-from .models import User, Url as UrlModel, ExpiredToken, RefreshToken
-from . import db
-from .config import Config
-from .utils.utils import cast_string_to_comparer, cast_string_to_type, cast_comparer_to_string, cast_type_to_string, \
-    get_info_to_send, generate_tokens
-from .utils.parser_engine.parser import parse_by_xpath
+from web_site.backend.models import User, Url as UrlModel, ExpiredToken, RefreshToken
+from web_site.backend import db
+from web_site.backend.config import Config
+from web_site.backend.parser.utils import cast_string_to_comparer, cast_string_to_type, cast_comparer_to_string, cast_type_to_string, \
+    get_info_to_send
+from web_site.backend.utils.token_service import TokenService
+from web_site.backend.parser.parser_engine.parser import parse_by_xpath
+from bot.controllers import ActivationController
 import jwt
 from functools import wraps
 from datetime import datetime, timedelta
@@ -17,21 +19,19 @@ def token_required(refresh=False):
         @wraps(f)
         def decorator(self, *args, **kwargs):
 
-            token = None
-
             # if "authorization" in request.headers:
             if not refresh:
                 token = request.headers['Authorization']
-                decrypt = Config.JWT_ACCESS_TOKEN
+                decrypt = Config.JWT_ACCESS_KEY
             else:
                 token = request.cookies.get("refresh_token")
-                decrypt = Config.JWT_REFRESH_TOKEN
+                decrypt = Config.JWT_REFRESH_KEY
 
             if not token:
                 return {
                            "success": False,
                            "message": "Отсутствует токен"
-                       }, 400
+                       }, 401
 
             try:
                 if token == 'bot':
@@ -43,7 +43,7 @@ def token_required(refresh=False):
 
                     if not current_user:
                         return {"success": False,
-                                "message": "Такого пользователя не существует"}, 400
+                                "message": "Такого пользователя не существует"}, 401
 
                     # token_expired = ExpiredToken.query.filter(ExpiredToken.token == token).first()
 
@@ -55,7 +55,7 @@ def token_required(refresh=False):
 
             except Exception as exc:
                 print(exc)
-                return {"success": False, "msg": "Неверный токен"}, 400
+                return {"success": False, "msg": "Неверный токен"}, 401
 
             return f(self, current_user, *args, **kwargs)
 
@@ -66,6 +66,7 @@ def token_required(refresh=False):
 rest = Api(version='1.0', title='API')
 urls = rest.namespace('urls')
 auth = rest.namespace('auth')
+telegram_auth = rest.namespace('telegram')
 
 get_url_parser = reqparse.RequestParser()
 get_url_parser.add_argument('url_id', type=int)
@@ -75,7 +76,6 @@ get_url_parser.add_argument('url_id', type=int)
 signup_model = auth.model(
     'SignUpModel', {
         "name": fields.String(required=True, min_length=2, max_length=32),
-        "telegram_id": fields.Integer(),
         "email": fields.String(required=True, min_length=4, max_length=64),
         "password": fields.String(required=True, min_length=8, max_length=32)
     }
@@ -115,7 +115,7 @@ class Register(Resource):
     @auth.expect(signup_model, validate=True)
     def post(self):
         data = request.get_json()
-        print(data)
+
         name = data.get("name")
         email = data.get("email")
         telegram_id = data.get("telegram_id")
@@ -145,16 +145,8 @@ class Register(Resource):
             db.session.add(user)
             db.session.commit()
             # ТОКЕНЫ
-            access_token, refresh_token = generate_tokens(email)
-
-            refresh_token_model = RefreshToken(
-                user_id=user.id,
-                token_value=refresh_token
-            )
-
-            db.session.add(refresh_token_model)
-            db.session.commit()
-
+            access_token, refresh_token = TokenService.generate_tokens(email)
+            TokenService.save_refresh_token(refresh_token, user.id)
             # Конец токенов
 
             success = True
@@ -219,15 +211,8 @@ class Login(Resource):
         # }, Config.SECRET_KEY)
 
         # ТОКЕНЫ
-        access_token, refresh_token = generate_tokens(email)
-
-        refresh_token_model = RefreshToken(
-            user_id=user.id,
-            token_value=refresh_token
-        )
-
-        db.session.add(refresh_token_model)
-        db.session.commit()
+        access_token, refresh_token = TokenService.generate_tokens(email)
+        TokenService.save_refresh_token(refresh_token, user.id)
         # КОНЕЦ ТОКЕНОВ
 
         response = make_response(
@@ -280,7 +265,7 @@ class Refresh(Resource):
         refresh_token = request.cookies.get('refresh_token')
         token_model = RefreshToken.query.filter(RefreshToken.token_value == refresh_token).first()
 
-        new_access_token, new_refresh_token = generate_tokens(token_model.owner.email)
+        new_access_token, new_refresh_token = TokenService.generate_tokens(token_model.owner.email)
 
         token_model.token_value = new_refresh_token
         db.session.add(token_model)
@@ -313,12 +298,12 @@ class Urls(Resource):
     def get(self, user):
         # user = User.query.filter(User.id == 1).first()  # затычка
 
-        if user == 'bot':
-            info = get_info_to_send(UrlModel.query.all())
-
-            return {
-                       'values': info
-                   }, 200
+        # if user == 'bot':
+        #     info = get_info_to_send(UrlModel.query.all())
+        #
+        #     return {
+        #                'values': info
+        #            }, 200
 
         res = user.urls
 
@@ -386,3 +371,24 @@ class Url(Resource):
                    'success': True
                }, 200
 
+
+@telegram_auth.route('/api/activate')
+class TelegramAuth(Resource):
+
+    @token_required()
+    def post(self, user):
+        code = ActivationController.generate_telegram_code(user.email)
+        ActivationController.stack[User] = [False, code, False]  # [activated, code, expired]
+
+        return {
+            'success': True,
+            'code': code
+        }, 200
+
+    @token_required()
+    def get(self, user):
+        status = await ActivationController().get_activation_status(user)
+
+        return {
+            'success': status
+        }, 200
