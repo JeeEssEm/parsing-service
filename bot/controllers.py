@@ -1,34 +1,35 @@
-import jwt
-from web_site.backend.config import Config
-from datetime import datetime, timedelta
-from time import sleep
+from random import randint
+from web_site.backend.models import TelegramCode, db
+from datetime import datetime
+from web_site.backend import app
 
 
 class ActivationController:
-    stack = {}
 
     @staticmethod
-    def generate_telegram_code(email):
-        code = jwt.encode(
-            {
-                'email': email,
-                'exp': datetime.now() + timedelta(minutes=2)
-            },
-            Config.TELEGRAM_GENERATOR_KEY
-        )
+    def generate_telegram_code():
+        code = randint(10000000, 99999999)
+
+        with app.app_context():
+            if TelegramCode.query.filter(TelegramCode.code == code).first():
+                print(code)
+                return ActivationController.generate_telegram_code()
 
         return code
 
-    async def get_activation_status(self, user) -> bool:  # expired/activated
-        start = 0
+    @staticmethod
+    def save_code(code, user):
+        cd = TelegramCode(
+            code=code,
+            telegram=user,
+            created=datetime.now())
 
-        while start < 120:
-            sleep(1)
-            if self.stack[user][0]:
-                return True  # activated
-            if self.stack[user][2]:
-                return False  # expired
-            start += 1
+        with app.app_context():
+            prev_code = TelegramCode.query.filter(TelegramCode.telegram == user).first()
+            if prev_code:
+                db.session.delete(prev_code)
 
-        return False  # expired
+            db.session.add(cd)
+            db.session.commit()
+
 

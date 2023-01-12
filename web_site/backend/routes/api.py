@@ -1,17 +1,16 @@
 from flask import request, make_response
 from flask_restx import Api, Resource, fields, reqparse
-from web_site.backend.models import User, Url as UrlModel, ExpiredToken, RefreshToken
+from web_site.backend.models import User, Url as UrlModel, TelegramCode, RefreshToken
 from web_site.backend import db
 from web_site.backend.config import Config
 from web_site.backend.parser.utils import cast_string_to_comparer, cast_string_to_type, cast_comparer_to_string, cast_type_to_string, \
     get_info_to_send
 from web_site.backend.utils.token_service import TokenService
 from web_site.backend.parser.parser_engine.parser import parse_by_xpath
-from bot.controllers import ActivationController
 import jwt
-from functools import wraps
 from datetime import datetime, timedelta
 from sqlalchemy import or_
+from functools import wraps
 
 
 def token_required(refresh=False):
@@ -377,18 +376,35 @@ class TelegramAuth(Resource):
 
     @token_required()
     def post(self, user):
-        code = ActivationController.generate_telegram_code(user.email)
-        ActivationController.stack[User] = [False, code, False]  # [activated, code, expired]
+        data = request.get_json()
+        code = data.get('telegram_code')
+
+        code_model = TelegramCode.query.filter(TelegramCode.code == code).first()
+
+        if not code_model:
+            return {
+                'success': False,
+                'message': 'Вы ввели неверный код'
+            }, 400
+
+        if (datetime.now() - code_model.created).seconds > 120:
+            db.session.delete(code_model)
+            db.session.commit()
+
+            return {
+                'success': False,
+                'message': 'Код недействителен'
+            }, 400
+
+        user.telegram_id = code
+
+        db.session.add(user)
+        db.session.delete(code_model)
+
+        db.session.commit()
 
         return {
             'success': True,
-            'code': code
+            'message': 'Аккаунт успешно активирован'
         }, 200
 
-    @token_required()
-    def get(self, user):
-        status = await ActivationController().get_activation_status(user)
-
-        return {
-            'success': status
-        }, 200

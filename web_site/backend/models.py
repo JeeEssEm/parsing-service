@@ -90,13 +90,14 @@ class Auth(db.Model):
         return f"<Auth> {self.login} {self.password}"
 
 
-class ExpiredToken(db.Model):
+class TelegramCode(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    token = db.Column(db.String, unique=True)
-    created = db.Column(db.DateTime, nullable=True)
+    code = db.Column(db.String, unique=True)
+    telegram = db.Column(db.Integer)
+    created = db.Column(db.DateTime)
 
     def __repr__(self):
-        return f"<Token> {self.token} {self.date}"
+        return f"<Code> {self.code} {self.telegram} {self.created}"
 
 
 class RefreshToken(db.Model):

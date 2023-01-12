@@ -1,7 +1,5 @@
 from bot import BOT
-from controllers import ActivationController
-from web_site.backend.config import Config
-import jwt
+from .controllers import ActivationController
 
 
 @BOT.message_handler(commands=['start'])
@@ -13,20 +11,11 @@ def start(msg):
 
 @BOT.message_handler(commands=['activate'])
 def activate_telegram(msg):
-    if len(msg.text.split()) == 1:
-        BOT.send_message(msg.from_user.id,
-                         """Отправьте мне код в сообщении. Пример: /activate ah123jhbjlkreusdhfjh23""")
-        return
+    code = ActivationController.generate_telegram_code()
+    ActivationController.save_code(code, msg.from_user.id)
 
-    user_code = msg.text.split()[1]
-
-    for user, values in ActivationController.stack.items():
-        if values[1] == user_code:
-            try:
-                jwt.decode(user_code, Config.TELEGRAM_GENERATOR_KEY)
-                values[0] = True
-            except jwt.ExpiredSignatureError:
-                values[2] = True
-
-            return
-
+    BOT.send_message(msg.from_user.id,
+                     f"""
+        Ваш код активации:\n{'*' + str(code) + '*'}
+Его нужно ввести на __сайте__""", parse_mode='MarkDown'
+                     )
