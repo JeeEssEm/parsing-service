@@ -57,9 +57,9 @@ export const ProfilePage = () => {
                            onChange={e => setEmail(e.target.value)} value={email}/>
                 </div>
 
-                <NavLink to="" className={`${styles['profile__property']} ${styles['profile__property_link']}`}>
+                <NavLink to="/activate" className={`${styles['profile__property']} ${styles['profile__property_link']}`}>
                     <h4 className={styles['profile__property-header']}>telegram</h4>
-                    <p className={styles['profile__property-text']}>@telegraph</p>
+                    <p className={styles['profile__property-text']}>{user.telegram}</p>
                     <p className={styles['profile__property-link']}>〉</p>
                 </NavLink>
 

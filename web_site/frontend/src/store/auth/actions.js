@@ -2,6 +2,7 @@ import {createAsyncThunk} from "@reduxjs/toolkit";
 import AuthService from "../../services/AuthService";
 import axios from "axios";
 import {API_URL} from "../../http";
+import ActivateTelegramService from "../../services/ActivateTelegramService";
 
 
 export const register = createAsyncThunk(
@@ -59,12 +60,9 @@ export const checkAuth = createAsyncThunk(
             console.log(e)
             return thunkAPI.rejectWithValue("")
         }
-
     }
 )
 
-export const Loading = createAsyncThunk('auth/stopLoading', async (arg, thunkAPI) => {
-    return thunkAPI.rejectWithValue("");
-})
+
 
 

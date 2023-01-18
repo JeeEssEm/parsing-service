@@ -1,5 +1,5 @@
 import {createSlice} from "@reduxjs/toolkit";
-import {register, login, logout, checkAuth} from "./actions";
+import {register, login, logout, checkAuth, SendCode} from "./actions";
 import AuthService from "../../services/AuthService";
 
 
@@ -16,8 +16,9 @@ export const authSlice = createSlice({
     name: 'auth',
     initialState,
     reducers: {
-        setLoading: (state) => {
-            state.loading = true;
+        setLogouted: (state) => {
+            state.user = null;
+            state.isAuth = false;
         },
 
         removeLoading: (state) => {
@@ -79,7 +80,6 @@ export const authSlice = createSlice({
             state.loading = false;
             state.user = null;
         })
-
     }
 })
 

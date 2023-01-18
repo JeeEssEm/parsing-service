@@ -10,6 +10,7 @@ import {useDispatch} from "react-redux";
 import {useEffect} from "react";
 import {checkAuth} from "./store/auth/actions";
 import {authSlice} from "./store/auth";
+import {ActivateTelegram} from "./elements/ActivateTelegram";
 
 
 function App() {
@@ -34,6 +35,7 @@ function App() {
                   <Route path="/login" element={<LoginPage/>}/>
                   <Route path="/register" element={<RegisterPage/>}/>
                   <Route path="profile" element={<ProfilePage/>}/>
+                  <Route path="activate" element={<ActivateTelegram/>}/>
               </Routes>
             </Layout>
           </BrowserRouter>

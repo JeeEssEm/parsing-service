@@ -14,8 +14,8 @@ export const Header = () => {
     const dispatch = useDispatch();
 
     let profile = <>
-        <NavLink to="/login"><Button style_type="outlined">Войти</Button></NavLink>
-        <NavLink to="/register"><Button style_type="filled">Зарегистрироваться</Button></NavLink>
+        <NavLink to="/login"><button style_type="outlined" className={"outline"}>Войти</button></NavLink>
+        <NavLink to="/register"><button style_type="filled">Зарегистрироваться</button></NavLink>
     </>
 
     if (isAuth) {
@@ -34,21 +34,27 @@ export const Header = () => {
         <div className={styles['header__left']}>
             <img src={XparseLogo} alt="Xparse" className={styles['header__logo']}/>
             <div className={styles['header__pages']}>
-                <NavLink to="/" className={
-                    ({isActive}) => isActive ?
-                    styles['header__page'] + " " + styles['header__page-active'] : styles['header__page']
-                }>Главная
+                <NavLink to="/" //className={
+                //     ({isActive}) => isActive ?
+                //     styles['header__page'] + " " + styles['header__page-active'] : styles['header__page']
+                // }
+                >Главная
                 </NavLink>
-                <NavLink to="/site" className={
-                    ({isActive}) => isActive ?
-                        styles['header__page'] + " " + styles['header__page-active'] : styles['header__page']
-                }>Сайты</NavLink>
+                <NavLink to="/site" //className={
+                    // ({isActive}) => isActive ?
+                    //     styles['header__page'] + " " + styles['header__page-active'] : styles['header__page']}
+                >Сайты</NavLink>
             </div>
         </div>
 
         <div className={styles['header__auth']}>
             {/*Сюда дописать условие на авторизованность*/}
             {profile}
+        </div>
+        <div>
+            {/*<a href="#" data-theme-switcher={"light"}>light</a>*/}
+            {/*<a href="#" data-theme-switcher={"dark"}>dark</a>*/}
+            <button className={"contrast theme-switcher"}>switch</button>
         </div>
     </header>
 }

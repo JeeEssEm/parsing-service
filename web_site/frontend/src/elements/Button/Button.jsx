@@ -10,7 +10,7 @@ export const Button = (props) => {
     const elementStyles = [modificateStyles, buttonStyles[style_type]]
 
     return (
-        <button onClick={onClick} className={elementStyles.join(" ")} aria-label='Кнопка' {...restProps} type='button'>
+        <button onClick={onClick} className={elementStyles.join(" ")} aria-label='Кнопка' type='button' {...restProps} >
             {children}
         </button>
     )
