@@ -1,11 +1,9 @@
-import {useEffect, useState} from "react";
+import {useEffect} from "react";
 import {useDispatch, useSelector} from "react-redux";
-import {getUrlById} from "../../store/url/actions";
-import {selectUrlModule} from "../../store/url/selectors";
 import {getUrls} from "../../store/urls/actions";
 import {selectUrlsModule} from "../../store/urls/selectors";
 import {ProjectCard} from "../../elements/ProjectCard";
-import {Container} from "@mui/material";
+import {NavLink} from "react-router-dom";
 
 
 export const SitesPage = () => {
@@ -19,13 +17,24 @@ export const SitesPage = () => {
         }
     })
 
-    return <section>
-        <h2>SitesPage</h2>
-        <Container>
+    return <>
+        <h2>Ваши сайты для отслеживания</h2>
+        <section className={"grid"}>
             {
                 allUrls.urls.map(({title, description, url}) => <ProjectCard key={title}
                     title={title} description={description} link={url}/>)
             }
-        </Container>
-    </section>
+            <NavLink to={"/create-url"} style={{
+                textDecoration: "none",
+                maxWidth: "50%",
+                minWidth: "30%",
+                margin: "var(--block-spacing-vertical)",
+                fontSize: "100%"
+            }}>
+                <button>
+                    <h1>Добавить</h1>
+                </button>
+            </NavLink>
+        </section>
+    </>
 }

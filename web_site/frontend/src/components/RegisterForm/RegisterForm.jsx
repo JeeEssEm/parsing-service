@@ -1,5 +1,4 @@
 import styles from "./styles.module.css";
-import {Button} from "../../elements/Button";
 import {Navigate, NavLink} from "react-router-dom";
 import XparseLogo from "../../static/images/logo_xparse.png";
 import {useDispatch, useSelector} from "react-redux";
@@ -45,25 +44,27 @@ export const RegisterForm = () => {
     console.log(isAuth);
 
     return (
-        <form className={styles['register']} method='post'>
-            <img src={XparseLogo} alt="Xparse" className={styles['register__logo']}/>
-            <input type="text" placeholder="Логин" className={styles['register__input']}
-                   required onChange={e => setName(e.target.value)} value={nameState}/>
-            <input type="text" placeholder="email" className={styles['register__input']}
-                   required onChange={e => setEmail(e.target.value)} value={emailState}/>
-            <input type="password" placeholder="Пароль" className={styles['register__input']}
-                   required onChange={e => setPassword(e.target.value)} value={passwordState}/>
-            <input type="password" placeholder="Повторите пароль" className={styles['register__input']}
-                   required onChange={e => setRepeatPassword(e.target.value)} value={repeatPasswordState}/>
-            <p className={styles['register__personal']}>
-                <input type="checkbox" className={styles['register__checkbox']} required/>
-                Даю согласие на обработку персональных данных
-            </p>
-            <Button style_type="filled" style={{width: `70%`}} onClick={() => handleRegister()}>Зарегистрироваться</Button>
-            <div className={styles['register__actions']}>
-                <NavLink to="/login" className={styles['register__link']}>Войти</NavLink>
-                <NavLink to="/" className={styles['register__link']}>Забыли пароль?</NavLink>
-            </div>
-        </form>
+        <article className={styles['register_wrapper']}>
+            <form className={styles['register']}>
+                <img src={XparseLogo} alt="Xparse" className={styles['register__logo']}/>
+                <input type="text" placeholder="Логин" /*className={styles['register__input']}*/
+                       required onChange={e => setName(e.target.value)} value={nameState}/>
+                <input type="text" placeholder="email" /*className={styles['register__input']}*/
+                       required onChange={e => setEmail(e.target.value)} value={emailState}/>
+                <input type="password" placeholder="Пароль" /*className={styles['register__input']}*/
+                       required onChange={e => setPassword(e.target.value)} value={passwordState}/>
+                <input type="password" placeholder="Повторите пароль" /*className={styles['register__input']}*/
+                       required onChange={e => setRepeatPassword(e.target.value)} value={repeatPasswordState}/>
+                <p className={styles['register__personal']}>
+                    <input type="checkbox" role="switch" className={styles['register__checkbox']} required/>
+                    Даю согласие на обработку персональных данных
+                </p>
+                <button /*style_type="filled"*/ style={{width: `70%`}} onClick={() => handleRegister()}>Зарегистрироваться</button>
+                <div className={styles['register__actions']}>
+                    <NavLink to="/login" /*className={styles['register__link']}*/>Войти</NavLink>
+                    <NavLink to="/" /*className={styles['register__link']}*/>Забыли пароль?</NavLink>
+                </div>
+            </form>
+        </article>
     )
 }

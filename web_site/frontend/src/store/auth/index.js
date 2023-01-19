@@ -1,5 +1,5 @@
 import {createSlice} from "@reduxjs/toolkit";
-import {register, login, logout, checkAuth, SendCode} from "./actions";
+import {register, login, logout, checkAuth} from "./actions";
 import AuthService from "../../services/AuthService";
 
 
@@ -23,7 +23,6 @@ export const authSlice = createSlice({
 
         removeLoading: (state) => {
             state.loading = false;
-            console.log('removed loading')
         }
     },
 

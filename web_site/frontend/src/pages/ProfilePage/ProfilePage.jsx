@@ -1,5 +1,4 @@
 import styles from "./styles.module.css";
-import {Button} from "../../elements/Button";
 import {Navigate, NavLink} from "react-router-dom";
 import {useSelector} from "react-redux";
 import {selectAuthModule} from "../../store/auth/selectors";
@@ -34,10 +33,14 @@ export const ProfilePage = () => {
     }
 
     return (
-        <div className={styles['root']}>
-            <h1>Ваш аккаунт</h1>
+        <div className={styles['wrapper']}>
+        <article className={styles['root']}>
+            <hgroup >
+                <h1>Ваш аккаунт</h1>
+                <h2>Основная информация</h2>
+            </hgroup>
+
             <section className={styles['profile']}>
-                <h2 className={styles['profile__title']}>Основная информация</h2>
 
                 {/*<div className={styles['profile__property']}>*/}
                 {/*    <h4 className={styles['profile__property-header']}>Фотография</h4>*/}
@@ -70,11 +73,14 @@ export const ProfilePage = () => {
                 </NavLink>
 
                 <div className={styles['profile__buttons']}>
-                    <Button style_type="outlined" modificateStyles={styles['profile__button']}>Отмена</Button>
-                    <Button style_type="filled" modificateStyles={styles['profile__button']}>Сохранить</Button>
+                    <button /*style_type="outlined" modificateStyles={styles['profile__button']}*/
+                        className={"outline " + styles['profile__button']}>Отмена</button>
+                    <button /*style_type="filled" modificateStyles={styles['profile__button']}*/
+                        className={styles['profile__button']}>Сохранить</button>
                 </div>
 
             </section>
+        </article>
         </div>
     )
 }

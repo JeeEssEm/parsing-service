@@ -13,4 +13,15 @@ export default class UrlService {
             }
         })
     }
+
+    static createUrl({xpath, title, description, url, type, comparer}) {
+        return api.post(`urls/api/url`, {
+            'xpath': xpath,
+            'title': title,
+            'url': url,
+            'description': description,
+            'type': type,
+            'comparer': comparer,
+        })
+    }
 }

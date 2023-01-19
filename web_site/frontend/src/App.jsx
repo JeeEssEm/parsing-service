@@ -11,10 +11,18 @@ import {useEffect} from "react";
 import {checkAuth} from "./store/auth/actions";
 import {authSlice} from "./store/auth";
 import {ActivateTelegram} from "./elements/ActivateTelegram";
+import {createTheme, ThemeProvider} from "@mui/material";
+import {CreateUrlPage} from "./pages/CreateUrlPage";
 
 
 function App() {
     const dispatch = useDispatch();
+
+    const darkTheme = createTheme({
+        palette: {
+            mode: "dark"
+        }
+    })
 
     useEffect(() => {
         // dispatch(authSlice.actions.setLoading)
@@ -27,6 +35,7 @@ function App() {
     })
 
     return (
+        <ThemeProvider theme={darkTheme}>
           <BrowserRouter>
             <Layout>
               <Routes>
@@ -36,9 +45,11 @@ function App() {
                   <Route path="/register" element={<RegisterPage/>}/>
                   <Route path="profile" element={<ProfilePage/>}/>
                   <Route path="activate" element={<ActivateTelegram/>}/>
+                  <Route path="create-url" element={<CreateUrlPage/>}/>
               </Routes>
             </Layout>
           </BrowserRouter>
+        </ThemeProvider>
       );
 }
 

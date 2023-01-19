@@ -1,4 +1,3 @@
-import {Button} from "../../elements/Button";
 import styles from "./styles.module.css";
 import {NavLink} from "react-router-dom";
 
@@ -15,8 +14,8 @@ export const HeroBlock = () => {
             </p>
 
             <div className={styles['hero__buttons']}>
-                <NavLink to=""><Button style_type="outlined">Приступить</Button></NavLink>
-                <NavLink to=""><Button style_type="filled">Гайд по настройке</Button></NavLink>
+                <NavLink to="" style={{textDecoration: "none"}}><button /*style_type="outlined"*/ className={'outline'}>Приступить</button></NavLink>
+                <NavLink to="" style={{textDecoration: "none"}}><button /*style_type="filled"*/>Гайд по настройке</button></NavLink>
             </div>
         </section>
     )

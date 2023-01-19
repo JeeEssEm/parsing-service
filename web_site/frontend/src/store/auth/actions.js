@@ -2,7 +2,7 @@ import {createAsyncThunk} from "@reduxjs/toolkit";
 import AuthService from "../../services/AuthService";
 import axios from "axios";
 import {API_URL} from "../../http";
-import ActivateTelegramService from "../../services/ActivateTelegramService";
+import {setMessage} from "../message";
 
 
 export const register = createAsyncThunk(
@@ -15,6 +15,7 @@ export const register = createAsyncThunk(
         }
         catch (e) {
             console.log(e);
+            thunkAPI.dispatch(setMessage(e.response.data))
             return thunkAPI.rejectWithValue("")
         }
     }
@@ -27,11 +28,13 @@ export const login = createAsyncThunk(
         try {
             const resp = await AuthService.login(email, password);
             // thunkAPI.dispatch(resp)
+
             console.log(resp);
             return resp.data;
         }
         catch (e) {
-            console.log(e);
+            console.log(e, e.message);
+            thunkAPI.dispatch(setMessage(e.response.data))
             return thunkAPI.rejectWithValue("");
         }
     }
@@ -52,12 +55,14 @@ export const checkAuth = createAsyncThunk(
         try {
             const response = await axios.get(`${API_URL}auth/api/users/refresh`, {
                 withCredentials: true
-            })
+            });
+
             localStorage.setItem('token', response.data.access_token);
             return response.data;
         }
         catch (e) {
-            console.log(e)
+            console.log(e);
+            thunkAPI.dispatch(setMessage(e.response.data))
             return thunkAPI.rejectWithValue("")
         }
     }
