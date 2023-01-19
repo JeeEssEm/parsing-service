@@ -19,3 +19,7 @@ def activate_telegram(msg):
         Ваш код активации:\n{'*' + str(code) + '*'}
 Его нужно ввести на __сайте__""", parse_mode='MarkDown'
                      )
+
+
+def send_info_message(chat_id, text):
+    BOT.send_message(chat_id, text, parse_mode='MarkDown')

@@ -33,28 +33,36 @@ def token_required(refresh=False):
                        }, 401
 
             try:
-                if token == 'bot':
-                    current_user = 'bot'
+                # if token == 'bot':
+                #     current_user = 'bot'
 
-                else:
-                    data = jwt.decode(token, decrypt, algorithms=["HS256"], verify=True)
-                    current_user = User.query.filter(User.email == data["email"]).first()
+                data = jwt.decode(token, decrypt, algorithms=["HS256"], verify=True)
+                elapsed_time = (datetime.now() - timedelta(seconds=data['exp']) - datetime(1970, 1, 1)).total_seconds()
 
-                    if not current_user:
-                        return {"success": False,
-                                "message": "Такого пользователя не существует"}, 401
+                if elapsed_time > 0:
+                    print(elapsed_time)
+                    return {
+                        'success': False,
+                        'message': 'Время действия токена истекло'
+                    }, 401
 
-                    # token_expired = ExpiredToken.query.filter(ExpiredToken.token == token).first()
+                current_user = User.query.filter(User.email == data["email"]).first()
 
-                    # if token_expired is not None:
-                    #     return {"success": False, "message": "Такого токена больше не существует"}, 400
+                if not current_user:
+                    return {"success": False,
+                            "message": "Такого пользователя не существует"}, 401
 
-                    # if not current_user.token_active:
-                    #     return {"success": False, "message": "Токен устарел"}, 400
+                # token_expired = ExpiredToken.query.filter(ExpiredToken.token == token).first()
+
+                # if token_expired is not None:
+                #     return {"success": False, "message": "Такого токена больше не существует"}, 400
+
+                # if not current_user.token_active:
+                #     return {"success": False, "message": "Токен устарел"}, 400
 
             except Exception as exc:
                 print(exc)
-                return {"success": False, "msg": "Неверный токен"}, 401
+                return {"success": False, "message": "Неверный токен"}, 401
 
             return f(self, current_user, *args, **kwargs)
 
@@ -157,6 +165,7 @@ class Register(Resource):
                     "user": {
                         "email": email,
                         "name": name,
+                        "telegram": "Не привязан"
                     },
                     "refresh_token": refresh_token,
                     "access_token": access_token
@@ -195,7 +204,7 @@ class Login(Resource):
         if not user:
             return {
                        "success": False,
-                       "message": "Такого поользователя не существует",
+                       "message": "Такого пользователя не существует",
                    }, 400
 
         if not user.check_password(password):
@@ -221,6 +230,7 @@ class Login(Resource):
                 "access_token": access_token,
                 "user": {
                     "email": user.email,
+                    "telegram": "Привязан" if user.telegram_id else "Не привязан",
                     "name": user.name
                 }
             }, 200
@@ -243,7 +253,6 @@ class Logout(Resource):
 
     @token_required(refresh=True)
     def post(self, user):
-        print(user, self)
         refresh_token = request.cookies.get('refresh_token')
         RefreshToken.query.filter(RefreshToken.token_value == refresh_token).delete()
         db.session.commit()
@@ -264,6 +273,11 @@ class Refresh(Resource):
         refresh_token = request.cookies.get('refresh_token')
         token_model = RefreshToken.query.filter(RefreshToken.token_value == refresh_token).first()
 
+        if not token_model:
+            return {
+                "success": False,
+            }, 401
+
         new_access_token, new_refresh_token = TokenService.generate_tokens(token_model.owner.email)
 
         token_model.token_value = new_refresh_token
@@ -276,6 +290,7 @@ class Refresh(Resource):
             "refresh_token": new_refresh_token,
             "user": {
                 "email": user.email,
+                "telegram": "Привязан" if user.telegram_id else "Не привязан",
                 "name": user.name
             }
         })
@@ -396,7 +411,7 @@ class TelegramAuth(Resource):
                 'message': 'Код недействителен'
             }, 400
 
-        user.telegram_id = code
+        user.telegram_id = code_model.telegram
 
         db.session.add(user)
         db.session.delete(code_model)

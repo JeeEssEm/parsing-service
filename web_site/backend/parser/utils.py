@@ -60,30 +60,30 @@ def compare_data(data, previous_data, comparer, expected_value=None):  # фун�
     if type(data) is Exception:
         return data
 
-    prev_now = f"\nпредыдущее: *{previous_data}*\nтекущее: *{data}*"
+    prev_now = f"\n—Предыдущее: *{previous_data}*\n—Текущее: *{data}*"
     empty_ret = (False, "")
 
     actions = {
         Comparer.EQUALITY.value: lambda x:
-        (True, f"Текущее значение **равно** заданному:{prev_now}", data)
+        (True, f"—Текущее значение *равно* заданному:{prev_now}", data)
         if x == expected_value else empty_ret,
 
         Comparer.COMPARISON_UP.value: lambda x:
-        (True, f"Текущее значение **меньше** заданного:{prev_now}", data)
+        (True, f"—Текущее значение *меньше* заданного:{prev_now}", data)
         if x > previous_data else empty_ret,
 
         Comparer.COMPARISON_DOWN.value: lambda x:
-        (True, f"Текущее значение **больше** заданного:{prev_now}", data)
+        (True, f"—Текущее значение *больше* заданного:{prev_now}", data)
         if x < previous_data else empty_ret,
 
         Comparer.CHANGE.value: lambda x:
-        (True, f"Текущее значение **изменилось**:{prev_now}", data)
+        (True, f"—Текущее значение *изменилось*:{prev_now}", data)
         if x != previous_data else empty_ret,
 
         Comparer.CUSTOM.value: lambda x: "" if x else empty_ret,
 
         Comparer.APPEARED.value: lambda x:
-        (True, f"Текущее/заданное значение **содержится** в заданном/текущем:{prev_now}", data)
+        (True, f"—Текущее/заданное значение *содержится* в заданном/текущем:{prev_now}", data)
         if expected_value in data or data in expected_value else empty_ret
     }
 
@@ -91,28 +91,25 @@ def compare_data(data, previous_data, comparer, expected_value=None):  # фун�
 
 
 def get_info_to_send(urls):  # получение информации для отправки пользователю
-    res = []
+
     for url, info in get_data(urls):
         comp_res = compare_data(info, url.prev_data, url.comparer, url.expected_value)
 
         if type(info) is Exception:
-            res.append(
-                {
+            yield {
                     "telegram_id": url.owner.telegram_id,
                     "message": str(info)
-                 })
+                 }
 
         elif comp_res[0]:
             url.prev_data = comp_res[2]
             db.session.add(url)
             db.session.commit()
 
-            res.append({
+            yield {
                 "telegram_id": url.owner.telegram_id,
                 "message": comp_res[1]
-            })
-
-    return res
+            }
 
 
 def cast_string_to_type(string):

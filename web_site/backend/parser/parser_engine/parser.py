@@ -46,7 +46,7 @@ def sign_in(url, login, password):
     ...
 
 
-DRIVER.quit()
+# DRIVER.quit()
 
 
 if __name__ == '__main__':

@@ -8,7 +8,7 @@ class ActivationController:
 
     @staticmethod
     def generate_telegram_code():
-        code = randint(10000000, 99999999)
+        code = randint(100000, 999999)
 
         with app.app_context():
             if TelegramCode.query.filter(TelegramCode.code == code).first():
