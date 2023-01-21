@@ -1,0 +1,19 @@
+
+.create-form {
+    gap: 20px;
+    display: flex;
+    flex-direction: column
+}
+
+
+.create-form__textarea {
+    max-width: 100%;
+    min-width: 100%;
+}
+
+.create-form__link {
+    color: var(--muted-color);
+    font-size: 0.7rem
+}
+
+

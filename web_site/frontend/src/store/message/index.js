@@ -27,5 +27,5 @@ export const messageSlice = createSlice({
 })
 
 
-export const { setMessage, setSuccessMessage } = messageSlice.actions
+export const { setMessage, setSuccessMessage, clearMessage } = messageSlice.actions
 

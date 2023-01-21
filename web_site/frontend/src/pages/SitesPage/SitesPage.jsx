@@ -4,6 +4,7 @@ import {getUrls} from "../../store/urls/actions";
 import {selectUrlsModule} from "../../store/urls/selectors";
 import {ProjectCard} from "../../elements/ProjectCard";
 import {NavLink} from "react-router-dom";
+import styles from "./styles.module.css";
 
 
 export const SitesPage = () => {
@@ -19,22 +20,20 @@ export const SitesPage = () => {
 
     return <>
         <h2>Ваши сайты для отслеживания</h2>
-        <section className={"grid"}>
+        <section className={styles['card-container']}>
             {
                 allUrls.urls.map(({title, description, url}) => <ProjectCard key={title}
                     title={title} description={description} link={url}/>)
             }
-            <NavLink to={"/create-url"} style={{
-                textDecoration: "none",
-                maxWidth: "50%",
-                minWidth: "30%",
-                margin: "var(--block-spacing-vertical)",
-                fontSize: "100%"
-            }}>
-                <button>
-                    <h1>Добавить</h1>
-                </button>
-            </NavLink>
+
         </section>
+
+        <NavLink to={"/create-url"} className={styles['card-container__add']}>
+            <h1>
+                <button className={styles['card-container__add-button'] + " outline"}>
+                    Добавить
+                </button>
+            </h1>
+        </NavLink>
     </>
 }

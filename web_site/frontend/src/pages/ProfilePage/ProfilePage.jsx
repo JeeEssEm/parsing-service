@@ -10,8 +10,6 @@ export const ProfilePage = () => {
     const [email, setEmail] = useState(user ? user.email : "");
     const [name, setName] = useState(user ? user.name : "");
 
-    console.log(user, isAuth, loading)
-
     useEffect(() => {
         if (user) {
             if (user.email !== email) {
@@ -28,7 +26,6 @@ export const ProfilePage = () => {
     }
 
     if (!isAuth) {
-        console.log('not auth', user)
         return <Navigate to="/login"/>
     }
 

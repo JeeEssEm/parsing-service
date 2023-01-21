@@ -1,5 +1,5 @@
 import {createSlice} from "@reduxjs/toolkit";
-import {getUrlById} from "./actions";
+import {createUrl, getUrlById} from "./actions";
 
 const initialState = {
     loading: false,
@@ -11,6 +11,7 @@ export const urlSlice = createSlice({
     initialState,
     reducers: {},
     extraReducers: builder => {
+        // получение url
         builder.addCase(getUrlById.pending, (state) => {
             state.loading = true
         })
@@ -23,6 +24,19 @@ export const urlSlice = createSlice({
         builder.addCase(getUrlById.rejected, (state) => {
             state.loading = false;
             state.url = null;
+        })
+
+        // создание url
+        builder.addCase(createUrl.pending, (state) => {
+            state.loading = true;
+        })
+
+        builder.addCase(createUrl.fulfilled, (state) => {
+            state.loading = false
+        })
+
+        builder.addCase(createUrl.rejected, (state) => {
+            state.loading = false;
         })
     }
 })
