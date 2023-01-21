@@ -9,6 +9,7 @@ VALUES = {
         "COMPARISON_UP": Comparer.COMPARISON_UP.value,
         "CUSTOM": Comparer.CUSTOM.value,
         "CHANGE": Comparer.CHANGE.value,
+        "APPEARED": Comparer.APPEARED.value
     }
 
 
@@ -66,7 +67,7 @@ def compare_data(data, previous_data, comparer, expected_value=None):  # фун�
     actions = {
         Comparer.EQUALITY.value: lambda x:
         (True, f"—Текущее значение *равно* заданному:{prev_now}", data)
-        if x == expected_value else empty_ret,
+        if x == expected_value and expected_value != previous_data else empty_ret,
 
         Comparer.COMPARISON_UP.value: lambda x:
         (True, f"—Текущее значение *меньше* заданного:{prev_now}", data)

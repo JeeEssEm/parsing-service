@@ -3,7 +3,8 @@ from flask_restx import Api, Resource, fields, reqparse
 from web_site.backend.models import User, Url as UrlModel, TelegramCode, RefreshToken
 from web_site.backend import db
 from web_site.backend.config import Config
-from web_site.backend.parser.utils import cast_string_to_comparer, cast_string_to_type, cast_comparer_to_string, cast_type_to_string, \
+from web_site.backend.parser.utils import cast_string_to_comparer, cast_string_to_type, cast_comparer_to_string, \
+    cast_type_to_string, \
     get_info_to_send
 from web_site.backend.utils.token_service import TokenService
 from web_site.backend.parser.parser_engine.parser import parse_by_xpath
@@ -42,9 +43,9 @@ def token_required(refresh=False):
                 if elapsed_time > 0:
                     print(elapsed_time)
                     return {
-                        'success': False,
-                        'message': 'Время действия токена истекло'
-                    }, 401
+                               'success': False,
+                               'message': 'Время действия токена истекло'
+                           }, 401
 
                 current_user = User.query.filter(User.email == data["email"]).first()
 
@@ -67,6 +68,7 @@ def token_required(refresh=False):
             return f(self, current_user, *args, **kwargs)
 
         return decorator
+
     return token_func
 
 
@@ -103,6 +105,7 @@ url_model = urls.model(
         'url': fields.String(required=True, min_length=5),
         'type': fields.String(required=True),
         'comparer': fields.String(required=True),
+        'appearedValue': fields.String()
     }
 )
 
@@ -226,7 +229,6 @@ class Login(Resource):
         response = make_response(
             {
                 "success": True,
-                "refresh_token": refresh_token,
                 "access_token": access_token,
                 "user": {
                     "email": user.email,
@@ -275,8 +277,8 @@ class Refresh(Resource):
 
         if not token_model:
             return {
-                "success": False,
-            }, 401
+                       "success": False,
+                   }, 401
 
         new_access_token, new_refresh_token = TokenService.generate_tokens(token_model.owner.email)
 
@@ -287,7 +289,6 @@ class Refresh(Resource):
         response = make_response({
             "success": True,
             "access_token": new_access_token,
-            "refresh_token": new_refresh_token,
             "user": {
                 "email": user.email,
                 "telegram": "Привязан" if user.telegram_id else "Не привязан",
@@ -341,14 +342,14 @@ class Url(Resource):
             url['comparer'] = cast_comparer_to_string(url['comparer'])
             url['type'] = cast_type_to_string(url['type'])
             return {
-                'success': True,
-                'url': url
-            }, 200
+                       'success': True,
+                       'url': url
+                   }, 200
 
         return {
-            'success': False,
-            'message': 'Url не найден'
-        }, 400
+                   'success': False,
+                   'message': 'Url не найден'
+               }, 400
 
     @token_required()
     @urls.expect(url_model, validate=True)
@@ -359,30 +360,49 @@ class Url(Resource):
         title = data.get('title')
         desc = data.get('description')
         url = data.get('url')
+        expected = data.get('appearedValue')
 
         tp = cast_string_to_type(data.get('type'))
         comp = cast_string_to_comparer(data.get('comparer'))
 
         # user = User.query.filter(User.id == 1).first()  # затычка
+        # TODO: проверка на существующий url у разных пользователей
+        url_db = user.urls.filter(UrlModel.url == url).first()
+
+        if user.urls.filter(UrlModel.title == title).first():
+            return {
+                "success": False,
+                "message": f"Название \"{title}\" уже существует"
+            }, 403
 
         status, prev_data = parse_by_xpath(url, xpath)
-        print(prev_data)
+
         if not status:
             return {
                        'success': False,
                        'message': str(prev_data)
                    }, 400
 
-        url = UrlModel(
-            owner_id=user.id, xpath=xpath, title=title, description=desc, url=url, type=tp, comparer=comp,
-            prev_data=prev_data
-        )
+        if not url_db:
+            url_db = UrlModel(
+                owner_id=user.id, xpath=xpath, title=title, description=desc, url=url, type=tp, comparer=comp,
+                prev_data=prev_data, expected_value=expected
+            )
+        else:
+            url_db.xpath = xpath
+            url_db.title = title
+            url_db.description = desc
+            url_db.url = url
+            url_db.comparer = comp
+            url_db.expected_value = expected
+            url_db.type = tp
 
-        db.session.add(url)
+        db.session.add(url_db)
         db.session.commit()
 
         return {
-                   'success': True
+                   'success': True,
+                   'message': f"Сайт \"{title}\" успешно добавлен"
                }, 200
 
 
@@ -398,18 +418,18 @@ class TelegramAuth(Resource):
 
         if not code_model:
             return {
-                'success': False,
-                'message': 'Вы ввели неверный код'
-            }, 400
+                       'success': False,
+                       'message': 'Вы ввели неверный код'
+                   }, 400
 
         if (datetime.now() - code_model.created).seconds > 120:
             db.session.delete(code_model)
             db.session.commit()
 
             return {
-                'success': False,
-                'message': 'Код недействителен'
-            }, 400
+                       'success': False,
+                       'message': 'Код недействителен'
+                   }, 400
 
         user.telegram_id = code_model.telegram
 
@@ -419,7 +439,6 @@ class TelegramAuth(Resource):
         db.session.commit()
 
         return {
-            'success': True,
-            'message': 'Аккаунт успешно активирован'
-        }, 200
-
+                   'success': True,
+                   'message': 'Аккаунт успешно активирован'
+               }, 200

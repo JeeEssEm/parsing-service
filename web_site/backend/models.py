@@ -75,7 +75,7 @@ class Url(db.Model):
         }
 
     def __repr__(self):
-        return f"<Url> {self.url} {self.xpath} {self.title}"
+        return f"<Url> {self.url} {self.xpath} {self.title} "
 
 
 class Auth(db.Model):
