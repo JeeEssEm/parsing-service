@@ -10,9 +10,10 @@ import {useDispatch} from "react-redux";
 import {useEffect} from "react";
 import {checkAuth} from "./store/auth/actions";
 import {authSlice} from "./store/auth";
-import {ActivateTelegram} from "./elements/ActivateTelegram";
 import {createTheme, ThemeProvider} from "@mui/material";
 import {CreateUrlPage} from "./pages/CreateUrlPage";
+import {EditUrlPage} from "./pages/EditUrlCardPage";
+import {ActivateOrChange} from "./pages/ActivateOrChange/ActivateOrChange";
 
 
 function App() {
@@ -44,8 +45,10 @@ function App() {
                   <Route path="/login" element={<LoginPage/>}/>
                   <Route path="/register" element={<RegisterPage/>}/>
                   <Route path="profile" element={<ProfilePage/>}/>
-                  <Route path="activate" element={<ActivateTelegram/>}/>
+                  <Route path="activate" element={<ActivateOrChange activate={true}/>}/>
                   <Route path="create-url" element={<CreateUrlPage/>}/>
+                  <Route path="edit-url/:urlId" element={<EditUrlPage/>}/>
+                  <Route path="profile/password" element={<ActivateOrChange/>}/>
               </Routes>
             </Layout>
           </BrowserRouter>

@@ -1,0 +1,17 @@
+.form {
+    width: 50%;
+    margin: auto;
+}
+
+
+@media (max-width: 1024px) {
+    .form {
+        width: 70%;
+    }
+}
+
+@media (max-width: 600px) {
+    .form {
+        width: 100%;
+    }
+}

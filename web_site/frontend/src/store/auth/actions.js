@@ -2,7 +2,7 @@ import {createAsyncThunk} from "@reduxjs/toolkit";
 import AuthService from "../../services/AuthService";
 import axios from "axios";
 import {API_URL} from "../../http";
-import {setMessage} from "../message";
+import {setMessage, setSuccessMessage} from "../message";
 
 
 export const register = createAsyncThunk(
@@ -68,6 +68,25 @@ export const checkAuth = createAsyncThunk(
     }
 )
 
+
+export const changeInfo = createAsyncThunk(
+    'user/change',
+    async ({email, name}, thunkAPI) => {
+        try {
+            const response = await AuthService.changeUserInfo({email, name});
+
+            if (response) {
+                thunkAPI.dispatch(setSuccessMessage(response.data));
+            }
+
+            return response.data;
+        }
+        catch (e) {
+            thunkAPI.dispatch(setMessage(e.response.data));
+            return thunkAPI.rejectWithValue("")
+        }
+    }
+)
 
 
 

@@ -19,7 +19,6 @@ export default class AuthService {
             "email": email,
             "name": name,
             "password": password,
-            "telegram_id": 1234
         }).then((response) => {
             console.log(response);
             if (response.data.success) {
@@ -37,6 +36,13 @@ export default class AuthService {
 
     static getCurrentUser = () => {
         return JSON.parse(localStorage.getItem('user'))
+    }
+
+    static changeUserInfo = ({email, name}) => {
+        return api.post('/user/api/change', {
+            'email': email,
+            'name': name
+        })
     }
 }
 

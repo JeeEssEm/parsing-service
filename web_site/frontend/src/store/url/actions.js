@@ -21,15 +21,14 @@ export const getUrlById = createAsyncThunk(
 
 export const createUrl = createAsyncThunk(
     'urls/create',
-    async ({xpath, title, description, url, type, comparer, appearedValue}, thunkAPI) => {
+    async ({xpath, title, description, url, type, comparer, appearedValue, edit}, thunkAPI) => {
         try {
             const resp = await UrlService.createUrl(
-                {xpath, title, description, url, type, comparer, appearedValue}
+                {xpath, title, description, url, type, comparer, appearedValue, edit}
             );
             if (resp.data) {
                 thunkAPI.dispatch(setSuccessMessage(resp.data));
             }
-            console.log(resp.data);
         }
         catch (e) {
             thunkAPI.dispatch(setMessage(e.response.data));

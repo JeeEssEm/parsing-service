@@ -4,6 +4,7 @@ import {NavLink} from "react-router-dom";
 import {useDispatch, useSelector} from "react-redux";
 import {selectIsAuth, selectIsLoading} from "../../store/auth/selectors";
 import {logout} from "../../store/auth/actions";
+import {CircularProgress} from "@mui/material";
 // import {useEffect} from "react";
 // import {checkAuth} from "../../store/auth/actions";
 
@@ -30,7 +31,7 @@ export const Header = () => {
     }
 
     if (isLoading) {
-        profile = <h1>Загрузка...</h1>
+        profile = <CircularProgress/>
     }
 
     return <header className={styles['header'] + " container-fluid"}>

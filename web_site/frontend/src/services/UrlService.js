@@ -14,7 +14,7 @@ export default class UrlService {
         })
     }
 
-    static createUrl({xpath, title, description, url, type, comparer, appearedValue}) {
+    static createUrl({xpath, title, description, url, type, comparer, appearedValue, edit}) {
         return api.post(`urls/api/url`, {
             'xpath': xpath,
             'title': title,
@@ -22,7 +22,8 @@ export default class UrlService {
             'description': description,
             'type': type,
             'comparer': comparer,
-            'appearedValue': appearedValue
+            'appearedValue': appearedValue,
+            'edit': edit
         })
     }
 }

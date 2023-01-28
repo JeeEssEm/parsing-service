@@ -1,28 +1,39 @@
 import styles from "./styles.module.css";
 import {Navigate, NavLink} from "react-router-dom";
-import {useSelector} from "react-redux";
+import {useDispatch, useSelector} from "react-redux";
 import {selectAuthModule} from "../../store/auth/selectors";
 import {useEffect, useState} from "react";
+import {changeInfo} from "../../store/auth/actions";
+import {CircularProgress} from "@mui/material";
 
 
 export const ProfilePage = () => {
     const {user, isAuth, loading} = useSelector((state) => selectAuthModule(state));
+
+    const dispatch = useDispatch();
+
+    // стейты для инпутов
     const [email, setEmail] = useState(user ? user.email : "");
     const [name, setName] = useState(user ? user.name : "");
 
+    const handleSubmit = () => {
+        dispatch(changeInfo({email, name}))
+    }
+
+    const reset = () => {
+        setEmail(user.email);
+        setName(user.name);
+    }
+
     useEffect(() => {
         if (user) {
-            if (user.email !== email) {
-                setEmail(user.email)
-            }
-            if (user.name !== name) {
-                setName(user.name)
-            }
+            setEmail(user.email);
+            setName(user.name);
         }
-    }, [user, email, name])
+    }, [user])
 
     if (loading) {
-        return <h1>Загрузка</h1>
+        return <CircularProgress/>
     }
 
     if (!isAuth) {
@@ -30,24 +41,18 @@ export const ProfilePage = () => {
     }
 
     return (
-        <div className={styles['wrapper']}>
+        <form className={styles['wrapper']} onSubmit={() => handleSubmit()}>
         <article className={styles['root']}>
-            <hgroup >
+            <hgroup>
                 <h1>Ваш аккаунт</h1>
                 <h2>Основная информация</h2>
             </hgroup>
 
             <section className={styles['profile']}>
-
-                {/*<div className={styles['profile__property']}>*/}
-                {/*    <h4 className={styles['profile__property-header']}>Фотография</h4>*/}
-
-                {/*</div>*/}
-
                 <div className={styles['profile__property']}>
                     <h4 className={styles['profile__property-header']}>Имя</h4>
                     <input type="text" className={styles['profile__property-text']}
-                           onChange={e => setName(e.target.value)} value={name}
+                           onChange={(e) => setName(e.target.value)} value={name}
                     />
                 </div>
 
@@ -63,22 +68,26 @@ export const ProfilePage = () => {
                     <p className={styles['profile__property-link']}>〉</p>
                 </NavLink>
 
-                <NavLink to="" className={`${styles['profile__property']} ${styles['profile__property_link']}`}>
+                <NavLink to="/profile/password" className={`${styles['profile__property']} ${styles['profile__property_link']}`}>
                     <h4 className={styles['profile__property-header']}>Пароль</h4>
                     <p className={styles['profile__property-text']}>Пароль</p>
                     <p className={styles['profile__property-link']}>〉</p>
                 </NavLink>
 
                 <div className={styles['profile__buttons']}>
-                    <button /*style_type="outlined" modificateStyles={styles['profile__button']}*/
+                    <button type='button' onClick={() => reset()}
                         className={"outline " + styles['profile__button']}>Отмена</button>
-                    <button /*style_type="filled" modificateStyles={styles['profile__button']}*/
-                        className={styles['profile__button']}>Сохранить</button>
+                    <button
+                        className={styles['profile__button']}
+                        disabled={user.name === name && user.email === email}>
+                        Сохранить
+                    </button>
                 </div>
 
             </section>
         </article>
-        </div>
+        </form>
     )
 }
+
 
