@@ -12,7 +12,15 @@ const initialState = {
 export const urlsSlice = createSlice({
     name: 'urls',
     initialState,
-    reducers: {},
+    reducers: {
+        removeUrlById: (state, id) => {
+            const index = state.urls.findIndex((url) => url.id === id);
+            state.urls.splice(index, 1);
+        },
+        addUrl(state, action) {
+            state.urls.push(action.payload.url);
+        }
+    },
     extraReducers: builder => {
         builder.addCase(getUrls.pending, (state) => {
           state.loading = true
@@ -30,4 +38,8 @@ export const urlsSlice = createSlice({
         })
     }
 })
+
+
+export const {removeUrlById, addUrl} = urlsSlice.actions;
+
 

@@ -14,7 +14,7 @@ export const RegisterForm = () => {
     const { loading, user, isAuth } = useSelector(
         (state) => selectAuthModule(state)
     )
-    const [emailState, setEmail] = useState('');
+    // const [emailState, setEmail] = useState('');
     const [nameState, setName] = useState('');
     const [passwordState, setPassword] = useState('');
     const [repeatPasswordState, setRepeatPassword] = useState('');
@@ -29,7 +29,7 @@ export const RegisterForm = () => {
     const handleRegister = () => {
         dispatch(register(
             {
-                email: emailState,
+                // email: emailState,
                 name: nameState,
                 password: passwordState
             }
@@ -49,8 +49,8 @@ export const RegisterForm = () => {
                 <img src={XparseLogo} alt="Xparse" className={styles['register__logo']}/>
                 <input type="text" placeholder="Логин" /*className={styles['register__input']}*/
                        required onChange={e => setName(e.target.value)} value={nameState}/>
-                <input type="text" placeholder="email" /*className={styles['register__input']}*/
-                       required onChange={e => setEmail(e.target.value)} value={emailState}/>
+                {/*<input type="text" placeholder="email" /*className={styles['register__input']}*/}
+                {/*       required onChange={e => setEmail(e.target.value)} value={emailState}/>*/}
                 <input type="password" placeholder="Пароль" /*className={styles['register__input']}*/
                        required onChange={e => setPassword(e.target.value)} value={passwordState}/>
                 <input type="password" placeholder="Повторите пароль" /*className={styles['register__input']}*/

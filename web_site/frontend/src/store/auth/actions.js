@@ -7,9 +7,9 @@ import {setMessage, setSuccessMessage} from "../message";
 
 export const register = createAsyncThunk(
     'auth/register',
-    async ({email, name, password}, thunkAPI) => {
+    async ({name, password}, thunkAPI) => {
         try {
-            const resp = await AuthService.registration(email, name, password);
+            const resp = await AuthService.registration(name, password);
             // thunkAPI.dispatch(resp)
             return resp.data;
         }
@@ -24,9 +24,9 @@ export const register = createAsyncThunk(
 
 export const login = createAsyncThunk(
     'auth/login',
-    async ({email, name, password}, thunkAPI) => {
+    async ({name, password}, thunkAPI) => {
         try {
-            const resp = await AuthService.login(email, password);
+            const resp = await AuthService.login(name, password);
             // thunkAPI.dispatch(resp)
 
             console.log(resp);
@@ -71,9 +71,9 @@ export const checkAuth = createAsyncThunk(
 
 export const changeInfo = createAsyncThunk(
     'user/change',
-    async ({email, name}, thunkAPI) => {
+    async ({name}, thunkAPI) => {
         try {
-            const response = await AuthService.changeUserInfo({email, name});
+            const response = await AuthService.changeUserInfo({name});
 
             if (response) {
                 thunkAPI.dispatch(setSuccessMessage(response.data));

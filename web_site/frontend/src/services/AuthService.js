@@ -2,9 +2,9 @@ import api from "../http";
 
 
 export default class AuthService {
-    static async login(email, password) {
+    static async login(name, password) {
         return api.post('/auth/api/users/login', {
-            "email": email,
+            "name": name,
             "password": password
         }).then((resp) => {
             if (resp.data.success) {
@@ -14,9 +14,8 @@ export default class AuthService {
         })
     }
 
-    static async registration(email, name, password) {
+    static async registration(name, password) {
         return api.post('/auth/api/users/register', {
-            "email": email,
             "name": name,
             "password": password,
         }).then((response) => {
@@ -38,9 +37,9 @@ export default class AuthService {
         return JSON.parse(localStorage.getItem('user'))
     }
 
-    static changeUserInfo = ({email, name}) => {
+    static changeUserInfo = ({name}) => {
         return api.post('/user/api/change', {
-            'email': email,
+            // 'email': email,
             'name': name
         })
     }

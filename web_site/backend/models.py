@@ -8,7 +8,7 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     telegram_id = db.Column(db.Integer, unique=True)
     name = db.Column(db.String(32), unique=True)
-    email = db.Column(db.String(64), unique=True)
+    # email = db.Column(db.String(64), unique=True)
     password = db.Column(db.String(128))
     token_active = db.Column(db.Boolean, default=False, nullable=False)
 
@@ -64,7 +64,8 @@ class Url(db.Model):
             "auth": {
                 "login": self.auth.login if self.auth else None,
                 "password": self.auth.password if self.auth else None
-            }
+            },
+            'id': self.id
         }
 
     def get_short_dict(self):

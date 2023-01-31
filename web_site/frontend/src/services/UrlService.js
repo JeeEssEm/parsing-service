@@ -26,4 +26,10 @@ export default class UrlService {
             'edit': edit
         })
     }
+
+    static removeUrl({id}) {
+        return api.post(`urls/api/url/remove`, {
+            'url_id': id
+        })
+    }
 }

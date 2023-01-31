@@ -47,7 +47,7 @@ def token_required(refresh=False):
                                'message': 'Время действия токена истекло'
                            }, 401
 
-                current_user = User.query.filter(User.email == data["email"]).first()
+                current_user = User.query.filter(User.name == data["name"]).first()
 
                 if not current_user:
                     return {"success": False,
@@ -62,7 +62,7 @@ def token_required(refresh=False):
                 #     return {"success": False, "message": "Токен устарел"}, 400
 
             except Exception as exc:
-                print(exc)
+                print(exc, token)
                 return {"success": False, "message": "Неверный токен"}, 401
 
             return f(self, current_user, *args, **kwargs)
@@ -75,6 +75,7 @@ def token_required(refresh=False):
 rest = Api(version='1.0', title='API')
 urls = rest.namespace('urls')
 auth = rest.namespace('auth')
+user_route = rest.namespace('user')
 telegram_auth = rest.namespace('telegram')
 
 get_url_parser = reqparse.RequestParser()
@@ -85,14 +86,14 @@ get_url_parser.add_argument('url_id', type=int)
 signup_model = auth.model(
     'SignUpModel', {
         "name": fields.String(required=True, min_length=2, max_length=32),
-        "email": fields.String(required=True, min_length=4, max_length=64),
+        # "email": fields.String(required=True, min_length=4, max_length=64),
         "password": fields.String(required=True, min_length=8, max_length=32)
     }
 )
 
 login_model = auth.model(
     'LoginModel', {
-        "email": fields.String(required=True, min_length=5),
+        "name": fields.String(required=True, min_length=2),
         "password": fields.String(required=True)
     }
 )
@@ -127,7 +128,7 @@ class Register(Resource):
         data = request.get_json()
 
         name = data.get("name")
-        email = data.get("email")
+        # email = data.get("email")
         telegram_id = data.get("telegram_id")
         password = data.get("password")
 
@@ -135,7 +136,7 @@ class Register(Resource):
         user_exist = User.query.filter(or_(
             User.name == name,
             User.telegram_id == telegram_id,
-            User.email == email
+            # User.email == email
         )).first()
 
         if user_exist:
@@ -148,14 +149,14 @@ class Register(Resource):
             user = User(
                 name=name,
                 telegram_id=telegram_id,
-                email=email
+                # email=email
             )
             user.set_password(password)
 
             db.session.add(user)
             db.session.commit()
             # ТОКЕНЫ
-            access_token, refresh_token = TokenService.generate_tokens(email)
+            access_token, refresh_token = TokenService.generate_tokens(name)
             TokenService.save_refresh_token(refresh_token, user.id)
             # Конец токенов
 
@@ -166,7 +167,7 @@ class Register(Resource):
                     "success": success,
                     "message": msg,
                     "user": {
-                        "email": email,
+                        # "email": email,
                         "name": name,
                         "telegram": "Не привязан"
                     },
@@ -199,10 +200,11 @@ class Login(Resource):
     def post(self):
         data = request.get_json()
 
-        email = data['email']
+        # email = data['email']
+        name = data['name']
         password = data['password']
 
-        user = User.query.filter(User.email == email).first()
+        user = User.query.filter(User.name == name).first()
 
         if not user:
             return {
@@ -222,7 +224,7 @@ class Login(Resource):
         # }, Config.SECRET_KEY)
 
         # ТОКЕНЫ
-        access_token, refresh_token = TokenService.generate_tokens(email)
+        access_token, refresh_token = TokenService.generate_tokens(name)
         TokenService.save_refresh_token(refresh_token, user.id)
         # КОНЕЦ ТОКЕНОВ
 
@@ -231,7 +233,7 @@ class Login(Resource):
                 "success": True,
                 "access_token": access_token,
                 "user": {
-                    "email": user.email,
+                    # "email": user.email,
                     "telegram": "Привязан" if user.telegram_id else "Не привязан",
                     "name": user.name
                 }
@@ -280,7 +282,7 @@ class Refresh(Resource):
                        "success": False,
                    }, 401
 
-        new_access_token, new_refresh_token = TokenService.generate_tokens(token_model.owner.email)
+        new_access_token, new_refresh_token = TokenService.generate_tokens(token_model.owner.name)
 
         token_model.token_value = new_refresh_token
         db.session.add(token_model)
@@ -290,7 +292,7 @@ class Refresh(Resource):
             "success": True,
             "access_token": new_access_token,
             "user": {
-                "email": user.email,
+                # "email": user.email,
                 "telegram": "Привязан" if user.telegram_id else "Не привязан",
                 "name": user.name
             }
@@ -343,7 +345,8 @@ class Url(Resource):
             url['type'] = cast_type_to_string(url['type'])
             return {
                        'success': True,
-                       'url': url
+                       'url': url,
+                       'id': url['id']
                    }, 200
 
         return {
@@ -365,22 +368,24 @@ class Url(Resource):
         tp = cast_string_to_type(data.get('type'))
         comp = cast_string_to_comparer(data.get('comparer'))
 
+        edit = data.get('edit')
+
         # user = User.query.filter(User.id == 1).first()  # затычка
         # TODO: проверка на существующий url у разных пользователей
         url_db = user.urls.filter(UrlModel.url == url).first()
 
-        if user.urls.filter(UrlModel.title == title).first():
+        if url_db and not edit:
             return {
-                "success": False,
-                "message": f"Название \"{title}\" уже существует"
-            }, 403
+                       "success": False,
+                       "message": f"Название \"{title}\" или ссылка уже существует"
+                   }, 403
 
         status, prev_data = parse_by_xpath(url, xpath)
 
         if not status:
             return {
                        'success': False,
-                       'message': str(prev_data)
+                       'message': str(prev_data),
                    }, 400
 
         if not url_db:
@@ -402,8 +407,28 @@ class Url(Resource):
 
         return {
                    'success': True,
-                   'message': f"Сайт \"{title}\" успешно добавлен"
+                   'message': f"Сайт \"{title}\" успешно добавлен",
+                   'url': url_db.get_short_dict()
                }, 200
+
+
+@urls.route('/api/url/remove')
+class UrlOperation(Resource):
+
+    @token_required()
+    def post(self, user):
+        data = request.get_json()
+        url_id = data.get('url_id')
+
+        url = user.urls.filter(UrlModel.id == url_id).first()
+
+        db.session.delete(url)
+        db.session.commit()
+
+        return {
+            'success': True,
+            'message': f'{url.title} был успешно удалён'
+        }, 200
 
 
 @telegram_auth.route('/api/activate')
@@ -441,4 +466,33 @@ class TelegramAuth(Resource):
         return {
                    'success': True,
                    'message': 'Аккаунт успешно активирован'
+               }, 200
+
+
+@user_route.route('/api/change')
+class UserRoute(Resource):
+
+    @token_required(refresh=True)
+    def post(self, user):
+        data = request.get_json()
+
+        # email = data.get('email')
+        name = data.get('name')
+
+        # if user.email != email:
+        # TODO: тут воткнуть активацию по почте
+        # ...
+        # user.email = email
+        user.name = name
+
+        db.session.add(user)
+        db.session.commit()
+
+        return {
+                   'success': True,
+                   'message': 'Информация об аккаунте успешно изменена',
+                   'user': {
+                       'name': user.name,
+                       # 'email': user.email
+                   }
                }, 200

@@ -8,7 +8,7 @@ import {login} from "../../store/auth/actions";
 
 export const LoginForm = () => {
     const {loading, user, isAuth} = useSelector((state) => selectAuthModule(state));
-    const [emailState, setEmail] = useState('');
+    const [nameState, setName] = useState('');
     const [passwordState, setPassword] = useState('');
     const dispatch = useDispatch();
 
@@ -24,7 +24,7 @@ export const LoginForm = () => {
     const handleLogin = () => {
         dispatch(login(
             {
-                email: emailState,
+                name: nameState,
                 password: passwordState
             }
         ))
@@ -35,7 +35,7 @@ export const LoginForm = () => {
         <article className={styles['login_wrapper']}>
             <form className={styles['login']}>
                 <img src={XparseLogo} alt="Xparse" className={styles['login__logo']}/>
-                <input type="text" placeholder="email" /*className={styles['login__input']}*/ onChange={e => setEmail(e.target.value)} value={emailState}/>
+                <input type="text" placeholder="Логин" /*className={styles['login__input']}*/ onChange={e => setName(e.target.value)} value={nameState}/>
                 <input type="password" placeholder="Пароль" /*className={styles['login__input']}*/ onChange={e => setPassword(e.target.value)} value={passwordState}/>
                     <button /*style_type="filled" style={{width: `70%`}}*/ onClick={() => handleLogin()}>Войти</button>
                 <div className={styles['login__actions']}>

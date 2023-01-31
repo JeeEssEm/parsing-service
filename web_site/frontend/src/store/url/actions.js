@@ -1,6 +1,7 @@
 import {createAsyncThunk} from "@reduxjs/toolkit";
 import UrlService from "../../services/UrlService";
 import {setMessage, setSuccessMessage} from "../message";
+import {addUrl, removeUrlById} from "../urls";
 
 
 export const getUrlById = createAsyncThunk(
@@ -27,6 +28,26 @@ export const createUrl = createAsyncThunk(
                 {xpath, title, description, url, type, comparer, appearedValue, edit}
             );
             if (resp.data) {
+                thunkAPI.dispatch(setSuccessMessage(resp.data));
+                thunkAPI.dispatch(addUrl(resp.data));
+            }
+        }
+        catch (e) {
+            thunkAPI.dispatch(setMessage(e.response.data));
+            return thunkAPI.rejectWithValue("");
+        }
+    }
+)
+
+
+export const removeUrl = createAsyncThunk(
+    'urls/remove',
+    async ({id}, thunkAPI) => {
+        try {
+            const resp = await UrlService.removeUrl({id});
+
+            if (resp.data) {
+                thunkAPI.dispatch(removeUrlById(id));
                 thunkAPI.dispatch(setSuccessMessage(resp.data));
             }
         }

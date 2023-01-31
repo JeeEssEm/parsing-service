@@ -3,6 +3,14 @@
     margin: auto;
 }
 
+.page {
+    min-height: calc(100vh - 100px - 1.2rem);
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    display: flex;
+}
+
 .root {
     display: flex;
     align-items: center;
@@ -31,7 +39,8 @@
     align-items: center;
     justify-content: flex-start;
     height: 100%;
-    margin-bottom: 0;
+    /*margin-bottom: 0;*/
+    margin: auto 0;
 }
 
 .profile__property {
@@ -47,8 +56,9 @@
     border: none;
     line-height: 100%;
     width: 75%;
-    margin-left: 5%;
-    margin-bottom: 0;
+
+    /*margin-left: 5%;*/
+    margin: 0;
     display: flex;
     align-items: center;
     /*color: rgb(32 33 36);*/
@@ -90,3 +100,15 @@
     justify-content: flex-end;
 }
 
+
+@media screen and (max-width: 1024px) {
+    .wrapper {
+        width: 80%;
+    }
+}
+
+@media screen and (max-width: 724px) {
+    .wrapper {
+        width: 100%;
+    }
+}

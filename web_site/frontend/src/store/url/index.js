@@ -1,5 +1,5 @@
 import {createSlice} from "@reduxjs/toolkit";
-import {createUrl, getUrlById} from "./actions";
+import {createUrl, getUrlById, removeUrl} from "./actions";
 
 const initialState = {
     loading: false,
@@ -45,6 +45,20 @@ export const urlSlice = createSlice({
         })
 
         builder.addCase(createUrl.rejected, (state) => {
+            state.loading = false;
+        })
+
+        // removing url
+        builder.addCase(removeUrl.fulfilled, (state) => {
+            state.loading = false;
+            state.url = null;
+        })
+
+        builder.addCase(removeUrl.pending, (state) => {
+            state.loading = true;
+        })
+
+        builder.addCase(removeUrl.rejected, (state) => {
             state.loading = false;
         })
     }

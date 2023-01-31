@@ -6,10 +6,10 @@ from web_site.backend.models import RefreshToken, db
 
 class TokenService:
     @staticmethod
-    def generate_tokens(email):
+    def generate_tokens(name):
         access_token = jwt.encode(
             {
-                'email': email,
+                'name': name,
                 'exp': datetime.now() + timedelta(minutes=30)
             },
             Config.JWT_ACCESS_KEY
@@ -17,7 +17,7 @@ class TokenService:
 
         refresh_token = jwt.encode(
             {
-                'email': email,
+                'name': name,
                 'exp': datetime.now() + timedelta(days=30)
             },
             Config.JWT_REFRESH_KEY
