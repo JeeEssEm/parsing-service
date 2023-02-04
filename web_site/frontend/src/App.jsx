@@ -14,6 +14,7 @@ import {createTheme, ThemeProvider} from "@mui/material";
 import {CreateUrlPage} from "./pages/CreateUrlPage";
 import {EditUrlPage} from "./pages/EditUrlCardPage";
 import {ActivateOrChange} from "./pages/ActivateOrChange/ActivateOrChange";
+import {Designation} from "./components/Designation";
 
 
 function App() {
@@ -48,7 +49,12 @@ function App() {
                   <Route path="activate" element={<ActivateOrChange activate={true}/>}/>
                   <Route path="create-url" element={<CreateUrlPage/>}/>
                   <Route path="edit-url/:urlId" element={<EditUrlPage/>}/>
-                  <Route path="profile/password" element={<ActivateOrChange/>}/>
+                  <Route path="reset-password/:code" element={<ActivateOrChange/>}/>
+                  <Route path="profile/password" element={<Designation title={"Смена пароля"} text={
+                      <>Отправьте боту команду <code>/reset-password</code> и перейдите по ссылке, которую он вам отправил</>}/>}/>
+                  <Route path="*" element={<Designation title={"404. Не найдено"} text={
+                      <>Страница не найдена</>
+                  }/>}/>
               </Routes>
             </Layout>
           </BrowserRouter>

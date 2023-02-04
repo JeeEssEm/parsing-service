@@ -88,5 +88,24 @@ export const changeInfo = createAsyncThunk(
     }
 )
 
+export const changePassword = createAsyncThunk(
+    'user/password',
+    async ({resetCode, newPassword}, thunkAPI) => {
+        try {
+            const response = await AuthService.changePassword({newPassword, resetCode});
+
+            if (response) {
+                thunkAPI.dispatch(setSuccessMessage(response.data));
+            }
+
+            return response.data;
+        }
+        catch (e) {
+            thunkAPI.dispatch(setMessage(e.response.data));
+            return thunkAPI.rejectWithValue("")
+        }
+    }
+)
+
 
 

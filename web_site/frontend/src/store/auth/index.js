@@ -1,5 +1,5 @@
 import {createSlice} from "@reduxjs/toolkit";
-import {register, login, logout, checkAuth, changeInfo} from "./actions";
+import {register, login, logout, checkAuth, changeInfo, changePassword} from "./actions";
 import AuthService from "../../services/AuthService";
 
 
@@ -94,6 +94,20 @@ export const authSlice = createSlice({
         })
 
         builder.addCase(changeInfo.pending, (state) => {
+            state.loading = true;
+        })
+
+        // change password
+
+        builder.addCase(changePassword.fulfilled, (state) => {
+            state.loading = false;
+        })
+
+        builder.addCase(changePassword.rejected, (state) => {
+            state.loading = false;
+        })
+
+        builder.addCase(changePassword.pending, (state) => {
             state.loading = true;
         })
     }

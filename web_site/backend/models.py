@@ -1,5 +1,12 @@
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
+from enum import IntEnum
+
+
+class CodeTypes(IntEnum):
+    telegram = 0
+    reset = 1
+
 
 db = SQLAlchemy()
 
@@ -91,14 +98,29 @@ class Auth(db.Model):
         return f"<Auth> {self.login} {self.password}"
 
 
-class TelegramCode(db.Model):
+class Code(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    code = db.Column(db.String, unique=True)
+    code_value = db.Column(db.String, unique=True)
+    code_type = db.Column(db.Integer)
     telegram = db.Column(db.Integer)
     created = db.Column(db.DateTime)
 
     def __repr__(self):
-        return f"<Code> {self.code} {self.telegram} {self.created}"
+        return f"<Code> {self.code_value} {self.telegram} {self.created}"
+
+    @staticmethod
+    def get_telegram_codes():
+        # return Code.query.filter(Code.code_type.type == 'Telegram')
+        return Code.get_codes(CodeTypes.telegram)
+
+    @staticmethod
+    def get_reset_codes():
+        # return Code.query.filter(Code.code_type == 'Reset')
+        return Code.get_codes(CodeTypes.reset)
+
+    @staticmethod
+    def get_codes(tp):
+        return Code.query.filter(Code.code_type == tp)
 
 
 class RefreshToken(db.Model):
@@ -107,7 +129,4 @@ class RefreshToken(db.Model):
     token_value = db.Column(db.String)
 
     owner = db.relationship("User")
-
-
-
 

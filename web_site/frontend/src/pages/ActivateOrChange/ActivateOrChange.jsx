@@ -2,13 +2,15 @@ import styles from "../../elements/ActivateTelegram/styles.module.css";
 import {ActivateTelegram} from "../../elements/ActivateTelegram";
 import {ChangePassword} from "../../components/ChangePassword";
 import {ArrowLeft} from "feather-icons-react/build/IconComponents";
-import {useNavigate} from "react-router-dom";
+import {useNavigate, useParams} from "react-router-dom";
 
 
 
 export const ActivateOrChange = ({activate}) => {
     let navigate = useNavigate();
-    let form = <ChangePassword/>;
+    const { code } = useParams();
+    let form = <ChangePassword code={code}/>;
+
 
     if (activate) {
         form = <ActivateTelegram/>;

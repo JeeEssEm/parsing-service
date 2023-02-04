@@ -8,7 +8,7 @@ export default class AuthService {
             "password": password
         }).then((resp) => {
             if (resp.data.success) {
-                localStorage.setItem('token', resp.data.access_token)
+                localStorage.setItem('token', resp.data.access_token);
             }
             return resp;
         })
@@ -41,6 +41,13 @@ export default class AuthService {
         return api.post('/user/api/change', {
             // 'email': email,
             'name': name
+        })
+    }
+
+    static changePassword({newPassword, resetCode}) {
+        return api.post('/user/api/password', {
+            resetCode,
+            newPassword
         })
     }
 }

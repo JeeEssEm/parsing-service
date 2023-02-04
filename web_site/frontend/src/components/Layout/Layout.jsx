@@ -13,11 +13,10 @@ export const Layout = ({children}) => {
         if (message.message) {
             setTimeout(() => dispatch(clearMessage()), 5000);
         }
-
     }
 
     useEffect(() => {
-        disappear()
+        disappear();
     })
 
     return (

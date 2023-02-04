@@ -10,4 +10,6 @@ class Config:
     JWT_ACCESS_KEY = "7ddd765fe9bdc41c154060f957450111773a8bbc717a425b30eed85e6e44b050"
     TELEGRAM_GENERATOR_KEY = "d3775e5d525a0bf9"
 
+    API_SERVER = "http://127.0.0.1:5000/"
+    CLIENT = "http://127.0.0.1:3000/"
 

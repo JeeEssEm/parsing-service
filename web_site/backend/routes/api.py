@@ -1,6 +1,6 @@
 from flask import request, make_response
 from flask_restx import Api, Resource, fields, reqparse
-from web_site.backend.models import User, Url as UrlModel, TelegramCode, RefreshToken
+from web_site.backend.models import User, Url as UrlModel, RefreshToken, Code
 from web_site.backend import db
 from web_site.backend.config import Config
 from web_site.backend.parser.utils import cast_string_to_comparer, cast_string_to_type, cast_comparer_to_string, \
@@ -20,6 +20,7 @@ def token_required(refresh=False):
         def decorator(self, *args, **kwargs):
 
             # if "authorization" in request.headers:
+
             if not refresh:
                 token = request.headers['Authorization']
                 decrypt = Config.JWT_ACCESS_KEY
@@ -439,7 +440,7 @@ class TelegramAuth(Resource):
         data = request.get_json()
         code = data.get('telegram_code')
 
-        code_model = TelegramCode.query.filter(TelegramCode.code == code).first()
+        code_model = Code.get_telegram_codes().filter_by(code_value=code).first()
 
         if not code_model:
             return {
@@ -496,3 +497,32 @@ class UserRoute(Resource):
                        # 'email': user.email
                    }
                }, 200
+
+
+@user_route.route('/api/password')
+class UserPassword(Resource):
+
+    @token_required(refresh=True)
+    def post(self, user):
+        data = request.get_json()
+
+        new_password = data.get('newPassword')
+        reset_code = data.get('resetCode')
+
+        reset_codes = Code.get_reset_codes()
+
+        if not reset_codes.filter_by(code_value=reset_code).first():
+            return {
+                'success': False,
+                'message': 'Такого кода сброса не существует'
+            }, 400
+
+        user.set_password(new_password)
+
+        db.session.add(user)
+        db.session.commit()
+
+        return {
+            'success': True,
+            'message': 'Пароль успешно обновлён'
+        }, 200
