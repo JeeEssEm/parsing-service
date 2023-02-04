@@ -4,8 +4,7 @@ from web_site.backend.models import User, Url as UrlModel, RefreshToken, Code
 from web_site.backend import db
 from web_site.backend.config import Config
 from web_site.backend.parser.utils import cast_string_to_comparer, cast_string_to_type, cast_comparer_to_string, \
-    cast_type_to_string, \
-    get_info_to_send
+    cast_type_to_string
 from web_site.backend.utils.token_service import TokenService
 from web_site.backend.parser.parser_engine.parser import parse_by_xpath
 import jwt
