@@ -24,7 +24,7 @@ function getKeyByValue(object, value) {
 
 
 export const EditUrl = (props) => {
-    const {xpath, url, description, title, appearedValue, type, comparer, id} = props;
+    const {xpath, url, description, title, expectedValue, type, comparer, id} = props;
     console.log(props)
     const dispatch = useDispatch();
     const navigate = useNavigate();
@@ -39,7 +39,7 @@ export const EditUrl = (props) => {
     const [url_, setUrl] = useState(url ? url : "");
     const [description_, setDescription] = useState(description ? description : "");
     const [title_, setTitle] = useState(title ? title : "");
-    const [appearedValue_, setAppearedValue] = useState(appearedValue ? appearedValue : "");
+    const [expectedValue_, setExpectedValue] = useState(expectedValue ? expectedValue : "");
 
     // валидация формы
     const handleSubmit = (e) => {
@@ -51,7 +51,7 @@ export const EditUrl = (props) => {
         //     description: description_,
         //     type: type_,
         //     comparer: comparer_,
-        //     appearedValue: appearedValue_
+        //     appearedValue: expectedValue_
         // });
 
         const resp = dispatch(createUrl({
@@ -61,7 +61,7 @@ export const EditUrl = (props) => {
             description: description_,
             type: type_,
             comparer: comparer_,
-            appearedValue: appearedValue_,
+            appearedValue: expectedValue_,
             edit: edit
         }));
 
@@ -117,9 +117,12 @@ export const EditUrl = (props) => {
                     </select>
 
                     {
-                        [comparers.appeared, comparers.equal].indexOf(comparer) !== -1 ? <>
-                            <input type="text" placeholder={"Введите значение, которое должно появиться"}
-                                   value={appearedValue_} onChange={(e) => setAppearedValue(e.target.value)}/>
+                        [comparers.appeared, comparers.equal].indexOf(comparer_) !== -1 ||
+                        ([comparers.comparison_up, comparers.comparison_down].indexOf(comparer_) !== -1
+                            && type_ === types.numeric)
+                            ? <>
+                            <input type="text" placeholder={"Введите значение, которое должно появиться или быть больше/меньше/равняться заданному"}
+                                   value={expectedValue_} onChange={(e) => setExpectedValue(e.target.value)}/>
                         </> : ""
                     }
 

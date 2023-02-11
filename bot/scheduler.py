@@ -1,10 +1,10 @@
 import schedule
 from time import sleep
 from multiprocessing import Process
-from web_site.backend.models import Url
-from web_site.backend.parser.utils import get_info_to_send
+from backend.models import Url
+from backend.parser.utils import get_info_to_send
 from .views import send_info_message
-from web_site.backend import app
+from backend import app
 # from .bot import BOT
 
 

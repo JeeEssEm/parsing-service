@@ -1,6 +1,6 @@
 from bot import BOT
 from .controllers import ActivationController, ResetPasswordController
-from web_site.backend.config import Config
+from backend.config import Config
 
 
 @BOT.message_handler(commands=['start'])

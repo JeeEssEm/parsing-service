@@ -1,9 +1,9 @@
-from .models import *
 from flask import Flask
 from flask_migrate import Migrate
+from flask_cors import CORS
 from .config import Config
 from .routes import *
-from flask_cors import CORS
+from .models import *
 
 app = Flask(__name__)
 CORS(app, supports_credentials=True)

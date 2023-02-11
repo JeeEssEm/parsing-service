@@ -1,7 +1,7 @@
 from random import randint
-from web_site.backend.models import Code, db, User, CodeTypes
+from backend.models import Code, db, User, CodeTypes
 from datetime import datetime
-from web_site.backend import app
+from backend import app
 
 
 with app.app_context():

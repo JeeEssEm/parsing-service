@@ -1,7 +1,7 @@
 import jwt
 from datetime import datetime, timedelta
-from web_site.backend.config import Config
-from web_site.backend.models import RefreshToken, db
+from backend.config import Config
+from backend.models import RefreshToken, db
 
 
 class TokenService:

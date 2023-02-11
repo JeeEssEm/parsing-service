@@ -17,7 +17,6 @@ export const LoginForm = () => {
     }
 
     if (isAuth) {
-        console.log(user);
         return <Navigate to={'/'}/>
     }
 

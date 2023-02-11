@@ -1,9 +1,10 @@
 import telebot
+from dotenv import load_dotenv
 import os
 
+load_dotenv()
 
-with open(os.path.join(os.path.dirname(__file__), '.env')) as f:
-    TOKEN = f.read()
+TOKEN = os.environ.get('TOKEN', default='EMPTY')
 
 BOT = telebot.TeleBot(TOKEN)
 

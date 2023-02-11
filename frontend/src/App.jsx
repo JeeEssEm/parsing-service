@@ -15,6 +15,7 @@ import {CreateUrlPage} from "./pages/CreateUrlPage";
 import {EditUrlPage} from "./pages/EditUrlCardPage";
 import {ActivateOrChange} from "./pages/ActivateOrChange/ActivateOrChange";
 import {Designation} from "./components/Designation";
+import {PrivacyPage} from "./pages/PrivacyPage";
 
 
 function App() {
@@ -55,6 +56,7 @@ function App() {
                   <Route path="*" element={<Designation title={"404. Не найдено"} text={
                       <>Страница не найдена</>
                   }/>}/>
+                  <Route path="/privacy" element={<PrivacyPage/>}/>
               </Routes>
             </Layout>
           </BrowserRouter>

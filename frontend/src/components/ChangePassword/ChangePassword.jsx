@@ -2,6 +2,7 @@ import {useState} from "react";
 import {useDispatch} from "react-redux";
 import {changePassword} from "../../store/auth/actions";
 import {setMessage} from "../../store/message";
+import DataValidationService from "../../services/DataValidationService";
 
 
 export const ChangePassword = (_code) => {
@@ -13,9 +14,10 @@ export const ChangePassword = (_code) => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        // TODO: другие проверки валидность пароля
-        if (password !== confirmPassword) {
-            dispatch(setMessage({message: 'Пароли не совпадают!'}));
+        let {status, message} = DataValidationService.validatePassword(password, confirmPassword)
+
+        if (!status) {
+            dispatch(setMessage({message: message}));
         }
         else {
             dispatch(changePassword({resetCode: code, newPassword: password}))

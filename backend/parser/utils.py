@@ -1,6 +1,6 @@
-from web_site.backend.models import db
-from web_site.backend.parser.enums import *
-from web_site.backend.parser.parser_engine import parser as ps
+from backend.models import db
+from backend.parser.enums import *
+from backend.parser.parser_engine import parser as ps
 # from web_site.backend.models import Url, db
 
 VALUES = {
