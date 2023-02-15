@@ -39,7 +39,6 @@ export default class AuthService {
 
     static changeUserInfo = ({name}) => {
         return api.post('/user/api/change', {
-            // 'email': email,
             'name': name
         })
     }

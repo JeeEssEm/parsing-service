@@ -88,7 +88,6 @@ class Login(Resource):
     def post(self):
         data = request.get_json()
 
-        # email = data['email']
         name = data['name']
         password = data['password']
 
@@ -105,11 +104,6 @@ class Login(Resource):
                        "success": False,
                        "message": "Неверный пароль"
                    }, 400
-
-        # token = jwt.encode({
-        #     "email": email,
-        #     "expires": str(datetime.utcnow() + timedelta(days=30))
-        # }, Config.SECRET_KEY)
 
         # ТОКЕНЫ
         access_token, refresh_token = TokenService.generate_tokens(name)

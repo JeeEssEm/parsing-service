@@ -39,7 +39,7 @@ export const LoginForm = () => {
                     <button /*style_type="filled" style={{width: `70%`}}*/ onClick={() => handleLogin()}>Войти</button>
                 <div className={styles['login__actions']}>
                    <NavLink to="/register" /*className={styles['login__link']}*/>Зарегистрироваться</NavLink>
-                   <NavLink to="/" /*className={styles['login__link']}*/>Забыли пароль?</NavLink>
+                   <NavLink to="/profile/password" /*className={styles['login__link']}*/>Забыли пароль?</NavLink>
                 </div>
             </form>
         </article>

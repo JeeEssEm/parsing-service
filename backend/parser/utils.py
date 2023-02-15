@@ -1,7 +1,6 @@
 from backend.models import db
 from backend.parser.enums import *
 from backend.parser.parser_engine import parser as ps
-# from web_site.backend.models import Url, db
 
 VALUES = {
         "EQUALITY": Comparer.EQUALITY.value,
@@ -13,24 +12,8 @@ VALUES = {
     }
 
 
-"""@dataclass
-class User:  # класс для хранения пользователя
-    url: str
-    telegram_id: int
-    xpath: str
-    comparer: int
-
-    type: int = 1  # int или str
-    previous_data: str = None
-    login: str = None
-    password: str = None
-"""
-
-
 def get_data(urls):  # получение всех данных с сайтов
     for url in urls:
-        # if user.login and user.password:  # TODO
-        #     ps.sign_in(user.url, user.login, user.password)
 
         if url.comparer == Comparer.APPEARED.value:
             status, element = ps.parse_text(url.url)
@@ -94,7 +77,8 @@ def compare_data(data, previous_data, comparer, expected_value=None):  # фун�
 def get_info_to_send(urls):  # получение информации для отправки пользователю
 
     for url, info in get_data(urls):
-        comp_res = compare_data(info, url.prev_data, url.comparer, url.expected_value)
+        comp_res = compare_data(info, url.prev_data, url.comparer,
+                                url.expected_value)
 
         if type(info) is Exception:
             yield {
@@ -109,7 +93,7 @@ def get_info_to_send(urls):  # получение информации для о
 
             yield {
                 "telegram_id": url.owner.telegram_id,
-                "message": comp_res[1]
+                "message": comp_res[1] + f"\n{url.url}",
             }
 
 

@@ -62,8 +62,9 @@ class ResetPasswordController:
         return False
 
     @staticmethod
-    def save_code(code: str):
-        code = Code(code_value=code, created=datetime.now(), code_type=CodeTypes.reset)
+    def save_code(code: str, telegram_id: int):
+        code = Code(code_value=code, created=datetime.now(),
+                    code_type=CodeTypes.reset, telegram=telegram_id)
 
         with app.app_context():
             db.session.add(code)

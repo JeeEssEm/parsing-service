@@ -5,7 +5,6 @@ from backend.models import Url
 from backend.parser.utils import get_info_to_send
 from .views import send_info_message
 from backend import app
-# from .bot import BOT
 
 
 class Schedule:
@@ -27,8 +26,7 @@ def send_schedule_message():
             send_info_message(result['telegram_id'], result['message'])
 
 
-schedule.every(30).minutes.do(send_schedule_message)
+schedule.every(20).seconds.do(send_schedule_message)
 # schedule.every(2).seconds.do(send_schedule_message)
-
-
-
+if __name__ == '__main__':
+    send_schedule_message()

@@ -27,18 +27,27 @@ def reset_password(msg):
     user_id = msg.from_user.id
 
     if not ResetPasswordController.is_user_exist(user_id):
-        BOT.send_message(user_id, "Ваш аккаунт телеграм *не привязан*", parse_mode='MarkDown')
+        BOT.send_message(
+            user_id,
+            "Ваш аккаунт телеграм *не привязан*",
+            parse_mode='MarkDown')
+
         return
 
     ResetPasswordController.remove_old_code(user_id)
     code = ResetPasswordController.generate_code()
-    ResetPasswordController.save_code(code)
+    ResetPasswordController.save_code(code, user_id)
 
     url = Config.CLIENT + f'reset-password/{code}'
 
-    BOT.send_message(user_id, f'Чтобы восстановить пароль от аккаунта, перейдите по <a href="{url}">ссылке</a>',
-                     parse_mode='HTML')
+    BOT.send_message(
+        user_id,
+        f'Чтобы восстановить пароль от аккаунта, перейдите по <a href="{url}">'
+        f'ссылке</a>',
+        parse_mode='HTML')
 
 
 def send_info_message(chat_id, text):
     BOT.send_message(chat_id, text, parse_mode='MarkDown')
+
+
