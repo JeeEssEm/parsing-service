@@ -14,8 +14,8 @@ export const HeroBlock = () => {
             </p>
 
             <div className={styles['hero__buttons']}>
-                <NavLink to="" style={{textDecoration: "none"}}><button /*style_type="outlined"*/ className={'outline'}>Приступить</button></NavLink>
-                <NavLink to="" style={{textDecoration: "none"}}><button /*style_type="filled"*/>Гайд по настройке</button></NavLink>
+                <NavLink to="/site" style={{textDecoration: "none"}}><button /*style_type="outlined"*/ className={'outline'}>Приступить</button></NavLink>
+                <NavLink to="/guide" style={{textDecoration: "none"}}><button /*style_type="filled"*/>Гайд по настройке</button></NavLink>
             </div>
         </section>
     )
