@@ -27,10 +27,6 @@ def parse_text(url):
     return parse_by_xpath(url, '/html/body')
 
 
-def sign_in(url, login, password):
-    ...
-
-
 # DRIVER.quit()
 
 

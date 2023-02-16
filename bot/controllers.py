@@ -2,6 +2,7 @@ from random import randint
 from backend.models import Code, db, User, CodeTypes
 from datetime import datetime
 from backend import app
+from os import urandom
 
 
 with app.app_context():
@@ -41,7 +42,7 @@ class ActivationController:
 class ResetPasswordController:
     @staticmethod
     def generate_code():
-        code = hex(randint(10000, 99999))
+        code = urandom(16).hex()
 
         if ResetPasswordController.is_code_exist(code):
             return ResetPasswordController.generate_code()
@@ -62,8 +63,9 @@ class ResetPasswordController:
         return False
 
     @staticmethod
-    def save_code(code: str):
-        code = Code(code_value=code, created=datetime.now(), code_type=CodeTypes.reset)
+    def save_code(code: str, telegram_id: int):
+        code = Code(code_value=code, created=datetime.now(),
+                    code_type=CodeTypes.reset, telegram=telegram_id)
 
         with app.app_context():
             db.session.add(code)

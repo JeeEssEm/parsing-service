@@ -13,7 +13,7 @@ import {setMessage} from "../../store/message";
 
 
 export const RegisterForm = () => {
-    const { loading, user, isAuth } = useSelector(
+    const { loading, isAuth } = useSelector(
         (state) => selectAuthModule(state)
     )
     const [nameState, setName] = useState('');
@@ -50,13 +50,10 @@ export const RegisterForm = () => {
                 }
             ))
         }
-
     }
-
     if (loading) {
         return <h1>Загрузка...</h1>
     }
-
     return (
         <article className={styles['register_wrapper']}>
             <form className={styles['register']} onSubmit={(e) => handleRegister(e)}>

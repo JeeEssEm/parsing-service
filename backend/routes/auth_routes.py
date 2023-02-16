@@ -3,7 +3,6 @@ from backend.models import db
 from flask import request, make_response
 from backend.utils.token_service import TokenService
 from backend.models import User, RefreshToken
-from sqlalchemy import or_
 from datetime import timedelta
 
 from backend.routes.api_models import signup_model, login_model
@@ -88,7 +87,6 @@ class Login(Resource):
     def post(self):
         data = request.get_json()
 
-        # email = data['email']
         name = data['name']
         password = data['password']
 
@@ -105,11 +103,6 @@ class Login(Resource):
                        "success": False,
                        "message": "Неверный пароль"
                    }, 400
-
-        # token = jwt.encode({
-        #     "email": email,
-        #     "expires": str(datetime.utcnow() + timedelta(days=30))
-        # }, Config.SECRET_KEY)
 
         # ТОКЕНЫ
         access_token, refresh_token = TokenService.generate_tokens(name)
@@ -133,7 +126,6 @@ class Login(Resource):
             httponly=True, max_age=timedelta(days=30)
         )
 
-        user.set_token_active(True)
         db.session.add(user)
         db.session.commit()
 

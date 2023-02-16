@@ -11,8 +11,6 @@ export const messageSlice = createSlice({
     initialState,
     reducers: {
         setMessage: (state, action) => {
-            console.log(action);
-            console.log(state)
             state.message = action.payload.message;
             state.success = false;
         },

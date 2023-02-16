@@ -2,7 +2,7 @@ from flask_restx import Resource
 from .namespaces import telegram_auth, user_route
 from .token_validation import token_required
 from flask import request
-from backend.models import Code, db
+from backend.models import Code, db, User
 from datetime import datetime
 
 
@@ -53,13 +53,7 @@ class UserRoute(Resource):
     def post(self, user):
         data = request.get_json()
 
-        # email = data.get('email')
         name = data.get('name')
-
-        # if user.email != email:
-        # TODO: тут воткнуть активацию по почте
-        # ...
-        # user.email = email
         user.name = name
 
         db.session.add(user)
@@ -70,7 +64,6 @@ class UserRoute(Resource):
                    'message': 'Информация об аккаунте успешно изменена',
                    'user': {
                        'name': user.name,
-                       # 'email': user.email
                    }
                }, 200
 
@@ -78,21 +71,23 @@ class UserRoute(Resource):
 @user_route.route('/api/password')
 class UserPassword(Resource):
 
-    @token_required(refresh=True)
-    def post(self, user):
+    def post(self):
         data = request.get_json()
 
         new_password = data.get('newPassword')
         reset_code = data.get('resetCode')
 
         reset_codes = Code.get_reset_codes()
+        code_model = reset_codes.filter_by(code_value=reset_code).first()
 
-        if not reset_codes.filter_by(code_value=reset_code).first():
+        if not code_model:
             return {
                 'success': False,
                 'message': 'Такого кода сброса не существует'
             }, 400
 
+        user = User.query.filter(
+            User.telegram_id == code_model.telegram).first()
         user.set_password(new_password)
 
         db.session.add(user)

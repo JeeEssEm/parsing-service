@@ -2,7 +2,7 @@ from flask import request
 from flask_restx import Resource, reqparse
 from backend.models import Url as UrlModel
 from backend.models import db
-from backend.parser.parser_engine.parser import parse_by_xpath
+from backend.parser.parser_engine.parser import parse_by_xpath, parse_text
 from backend.parser.utils import (
     cast_string_to_comparer,
     cast_string_to_type,
@@ -80,7 +80,10 @@ class Url(Resource):
                 "message": f"Название \"{title}\" или ссылка уже существует",
             }, 403
 
-        status, prev_data = parse_by_xpath(url, xpath)
+        if comp == 5:
+            status, prev_data = parse_text(url)
+        else:
+            status, prev_data = parse_by_xpath(url, xpath)
 
         if not status:
             return {

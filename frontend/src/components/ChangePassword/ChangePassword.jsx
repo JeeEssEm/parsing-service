@@ -14,7 +14,7 @@ export const ChangePassword = (_code) => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        let {status, message} = DataValidationService.validatePassword(password, confirmPassword)
+        let [status, message] = DataValidationService.validatePassword(password, confirmPassword)
 
         if (!status) {
             dispatch(setMessage({message: message}));

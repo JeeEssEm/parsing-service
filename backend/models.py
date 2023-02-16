@@ -15,9 +15,7 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     telegram_id = db.Column(db.Integer, unique=True)
     name = db.Column(db.String(32), unique=True)
-    # email = db.Column(db.String(64), unique=True)
     password = db.Column(db.String(128))
-    token_active = db.Column(db.Boolean, default=False, nullable=False)
 
     urls = db.relationship("Url", back_populates="owner", lazy="dynamic")
 
@@ -31,9 +29,6 @@ class User(db.Model):
 
     def check_password(self, pwd):
         return check_password_hash(self.password, pwd)
-
-    def set_token_active(self, status):
-        self.token_active = status
 
     def __repr__(self):
         return f"<User> {self.name} {self.telegram_id} {self.urls}"

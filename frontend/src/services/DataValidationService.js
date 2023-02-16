@@ -16,6 +16,7 @@ export default class DataValidationService {
                  ''
             ]
         }
+
         return [
             false,
             'Пароль должен содержать минимум одну,' +
