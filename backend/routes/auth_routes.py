@@ -3,7 +3,6 @@ from backend.models import db
 from flask import request, make_response
 from backend.utils.token_service import TokenService
 from backend.models import User, RefreshToken
-from sqlalchemy import or_
 from datetime import timedelta
 
 from backend.routes.api_models import signup_model, login_model
@@ -127,7 +126,6 @@ class Login(Resource):
             httponly=True, max_age=timedelta(days=30)
         )
 
-        user.set_token_active(True)
         db.session.add(user)
         db.session.commit()
 

@@ -25,7 +25,6 @@ function getKeyByValue(object, value) {
 
 export const EditUrl = (props) => {
     const {xpath, url, description, title, expectedValue, type, comparer, id} = props;
-    console.log(props)
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const edit = Object.keys(props).length !== 0;
@@ -97,13 +96,13 @@ export const EditUrl = (props) => {
                         <NavLink to={"/"}><p className={styles['create-form__link']}>Где найти xpath?</p></NavLink>
                     </div>
 
-                    <select onChange={(e) => setType(e.target.value)}>
+                    <select onChange={(e) => setType(e.target.value)} value={type_}>
                         <option defaultValue disabled>Тип (число/строка)</option>
                         <option value={types.numeric}>Число</option>
                         <option value={types.string}>Строка</option>
                     </select>
 
-                    <select onChange={(e) => setComparer(e.target.value)}>
+                    <select onChange={(e) => setComparer(e.target.value)} value={comparer_}>
                         <option defaultValue disabled>Условие сравнения</option>
                         <option value={comparers.equal}>Равенство</option>
                         {
