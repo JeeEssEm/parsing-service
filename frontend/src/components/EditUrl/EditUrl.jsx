@@ -93,7 +93,7 @@ export const EditUrl = (props) => {
                             marginBottom: "0.2rem"
                         }} disabled={comparer_ === comparers.appeared}
                                value={xpath_} onChange={(e) => setXpath(e.target.value)}/>
-                        <NavLink to={"/"}><p className={styles['create-form__link']}>Где найти xpath?</p></NavLink>
+                        <NavLink to={"/guide"}><p className={styles['create-form__link']}>Где найти xpath?</p></NavLink>
                     </div>
 
                     <select onChange={(e) => setType(e.target.value)} value={type_}>
