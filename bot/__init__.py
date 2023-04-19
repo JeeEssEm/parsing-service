@@ -6,6 +6,3 @@ from .scheduler import Schedule
 def main():
     Schedule.start_process()
     BOT.polling()
-
-
-
