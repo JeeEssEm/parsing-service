@@ -7,4 +7,3 @@ load_dotenv()
 TOKEN = os.environ.get('TOKEN', default='EMPTY')
 
 BOT = telebot.TeleBot(TOKEN)
-

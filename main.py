@@ -19,5 +19,3 @@ if __name__ == '__main__':
 
     flask_thread.start()
     telegram_thread.start()
-
-
