@@ -67,7 +67,7 @@ def compare_data(data, previous_data, comparer, expected_value=None):  # фун�
         Comparer.CUSTOM.value: lambda x: "" if x else empty_ret,
 
         Comparer.APPEARED.value: lambda x:
-        (True, f"—Текущее/заданное значение *содержится* в заданном/текущем:{prev_now}", data)
+        (True, f"—Текущее/заданное значение *содержится* в заданном/текущем:", data)
         if expected_value in data or data in expected_value else empty_ret
     }
 
@@ -94,7 +94,7 @@ def get_info_to_send(urls):  # получение информации для о
             url.prev_data = comp_res[2]
             db.session.add(url)
             db.session.commit()
-
+        # print(comp_res[1], url.url)
             yield {
                 "telegram_id": url.owner.telegram_id,
                 "message": comp_res[1] + f"\n{url.url}",

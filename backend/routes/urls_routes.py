@@ -82,6 +82,8 @@ class Url(Resource):
 
         if comp == 5:
             status, prev_data = parse_text(url)
+        elif comp == 0:
+            status, prev_data = (True, '')
         else:
             status, prev_data = parse_by_xpath(url, xpath)
 
