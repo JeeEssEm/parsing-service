@@ -54,11 +54,11 @@ def compare_data(data, previous_data, comparer, expected_value=None):  # фун�
 
         Comparer.COMPARISON_UP.value: lambda x:
         (True, f"—Текущее значение *меньше* заданного:{prev_now}", data)
-        if x > cast_to_numeric(previous_data) else empty_ret,
+        if x > cast_to_numeric(expected_value or previous_data) else empty_ret,
 
         Comparer.COMPARISON_DOWN.value: lambda x:
         (True, f"—Текущее значение *больше* заданного:{prev_now}", data)
-        if x < cast_to_numeric(previous_data) else empty_ret,
+        if x < cast_to_numeric(expected_value or previous_data) else empty_ret,
 
         Comparer.CHANGE.value: lambda x:
         (True, f"—Текущее значение *изменилось*:{prev_now}", data)
@@ -78,10 +78,7 @@ def get_info_to_send(urls):  # получение информации для о
 
     for url, info in get_data(urls):
         comp_res = compare_data(
-            info, url.prev_data, url.comparer,
-            cast_to_numeric(url.expected_value)
-            if url.type == Types.Numeric.value
-            else url.expected_value
+            info, url.prev_data, url.comparer, url.expected_value
         )
 
         if type(info) is Exception:
